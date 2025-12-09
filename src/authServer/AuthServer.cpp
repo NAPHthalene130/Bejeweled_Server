@@ -1,19 +1,19 @@
-#include "LoginServer.h"
+#include "AuthServer.h"
 #include <functional>
 
-LoginServer::LoginServer(unsigned short port)
+AuthServer::AuthServer(unsigned short port)
     : acceptor(ioContext, tcp::endpoint(tcp::v4(), port)) {
     // 设置套接字重用选项，避免端口占用问题
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     startAccept();
-    std::cout << "LoginServer listening on port " << port << std::endl;
+    std::cout << "AuthServer listening on port " << port << std::endl;
 }
 
-LoginServer::~LoginServer() {
+AuthServer::~AuthServer() {
     stop();
 }
 
-void LoginServer::run() {
+void AuthServer::run() {
     // 1. 创建工作线程池（数量通常为CPU核心数）
     std::size_t threadPoolSize = std::thread::hardware_concurrency();
     if (threadPoolSize == 0) threadPoolSize = 2;
@@ -42,7 +42,7 @@ void LoginServer::run() {
     std::cout << "All worker threads have finished" << std::endl;
 }
 
-void LoginServer::stop() {
+void AuthServer::stop() {
     if (!stopped.exchange(true)) {
         std::cout << "Stopping server..." << std::endl;
         
@@ -58,7 +58,7 @@ void LoginServer::stop() {
     }
 }
 
-void LoginServer::startAccept() {
+void AuthServer::startAccept() {
     if (stopped) return;
     
     auto newSocket = std::make_shared<tcp::socket>(ioContext);
@@ -69,7 +69,7 @@ void LoginServer::startAccept() {
         });
 }
 
-void LoginServer::handleAccept(std::shared_ptr<tcp::socket> socket,
+void AuthServer::handleAccept(std::shared_ptr<tcp::socket> socket,
                                  const boost::system::error_code& error) {
     if (!error && !stopped) {
         try {
@@ -94,7 +94,7 @@ void LoginServer::handleAccept(std::shared_ptr<tcp::socket> socket,
     }
 }
 
-void LoginServer::startReceive(std::shared_ptr<tcp::socket> socket) {
+void AuthServer::startReceive(std::shared_ptr<tcp::socket> socket) {
     if (stopped) return;
     
     // 使用shared_ptr管理缓冲区，确保其生命周期覆盖整个异步操作链
@@ -107,7 +107,7 @@ void LoginServer::startReceive(std::shared_ptr<tcp::socket> socket) {
         });
 }
 
-void LoginServer::handleReceive(std::shared_ptr<tcp::socket> socket,
+void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                   std::shared_ptr<std::vector<char>> buffer,
                                   const boost::system::error_code& error,
                                   std::size_t bytesTransferred) {

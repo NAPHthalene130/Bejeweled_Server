@@ -1,16 +1,17 @@
-#ifndef LOGIN_SERVER_H
-#define LOGIN_SERVER_H
+#ifndef AUTH_SERVER_H
+#define AUTH_SERVER_H
 
 #include <iostream>
 #include <thread>
 #include <vector>
 #include <atomic>
 #include <boost/asio.hpp>
-class LoginServer {
+
+class AuthServer {
     using tcp = boost::asio::ip::tcp;
 public:
-    LoginServer(unsigned short port);
-    ~LoginServer();
+    AuthServer(unsigned short port);
+    ~AuthServer();
     void run();
     void stop();
 
@@ -30,4 +31,4 @@ private:
     std::atomic<bool> stopped{false};
 };
 
-#endif // LOGIN_SERVER_H
+#endif // AUTH_SERVER_H

@@ -1,10 +1,10 @@
 #include <iostream>
-#include "authServer/LoginServer.h"
+#include "authServer/AuthServer.h"
 
 int main() {
     try {
         unsigned short port = 10086;
-        LoginServer server(port);
+        AuthServer server(port);
         server.run();
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

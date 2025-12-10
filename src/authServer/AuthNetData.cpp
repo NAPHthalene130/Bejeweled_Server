@@ -58,3 +58,21 @@ void AuthNetData::setData(std::string data)
     this->data = data;
 }
 
+void toJson(nlohmann::json& j, const AuthNetData& p) {
+    j = nlohmann::json{
+        {"type", p.type},
+        {"id", p.id},
+        {"password", p.password},
+        {"email", p.email},
+        {"data", p.data}
+    };
+}
+
+void fromJson(const nlohmann::json& j, AuthNetData& p) {
+    j.at("type").get_to(p.type);
+    j.at("id").get_to(p.id);
+    j.at("password").get_to(p.password);
+    j.at("email").get_to(p.email);
+    j.at("data").get_to(p.data);
+}
+

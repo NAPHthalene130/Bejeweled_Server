@@ -1,6 +1,8 @@
 #ifndef AUTH_NET_DATA_H
 #define AUTH_NET_DATA_H
 #include <string>
+#include <json.hpp>
+
 class AuthNetData{
     using string = std::string;
 public:
@@ -23,6 +25,8 @@ private:
     string email;
     string data;
     
+    friend void toJson(nlohmann::json& j, const AuthNetData& p);
+    friend void fromJson(const nlohmann::json& j, AuthNetData& p);
 };
 
 #endif // AUTH_NET_DATA_H

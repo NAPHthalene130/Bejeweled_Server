@@ -29,6 +29,7 @@ private:
     tcp::acceptor acceptor;
     std::vector<std::thread> workerThreads;
     std::atomic<bool> stopped{false};
+    bool emailCodeSend(std::string email);
 };
 
 #endif // AUTH_SERVER_H

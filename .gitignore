@@ -96,3 +96,6 @@ CMakeLists.txt.user*
 !.vscode/.env.template
 # Explicitly ignore .vscode/.env
 .vscode/.env
+
+#Config
+./src/Config.h

@@ -2,6 +2,7 @@
 #include "AuthNetData.h"
 #include <functional>
 #include "json.hpp"
+#include "../util/SqlUtil.h"
 using json = nlohmann::json;
 AuthServer::AuthServer(unsigned short port)
     : acceptor(ioContext, tcp::endpoint(tcp::v4(), port)) {
@@ -123,8 +124,46 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         
         //TODO:此处完成登录解析
         AuthNetData receivedData = nlohmann::json::parse(receivedStr).get<AuthNetData>();
-        
         std::string response;
+        AuthNetData responseData;
+        responseData.setType(-1);
+        try {
+            if (receivedData.getType() == 1) { //登录逻辑
+                responseData.setType(1);
+                int authResult = SqlUtil::authPasswordFromPlayerinfo(receivedData.getId(), receivedData.getPassword());
+                if (authResult == 1) { //1 登录成功
+                    responseData.setData("LOGIN_SUCCESS");
+                } else if (authResult == 2) { //2 登录失败
+                    responseData.setData("LOGIN_FAIL");
+                } else if (authResult == 3) { //3 其它错误
+                    responseData.setData("LOGIN_FAIL");
+                }
+            } else if (receivedData.getType() == 2) { //注册逻辑
+                responseData.setType(2);
+                int registerResult = SqlUtil::registerFromPlayerinfo(receivedData.getId(), receivedData.getPassword(), receivedData.getEmail(), receivedData.getData(), receivedData.getData());
+                if (registerResult == 1) { //1 注册成功
+                    responseData.setData("REGISTER_SUCCESS");
+                } else if (registerResult == 2) { //2 邮箱验证码错误
+                    responseData.setData("REGISTER_FAIL_EMAILCODE");
+                } else if (registerResult == 3) { //3 账号已存在
+                    responseData.setData("REGISTER_FAIL_ACCOUNT");
+                } else if (registerResult == 4) {  //4 邮箱已存在
+                    responseData.setData("REGISTER_FAIL_EMAIL");
+                } else if (registerResult == 5) { //5 其它错误
+                    responseData.setData("REGISTER_FAIL_UNKNOWN");
+                }
+            } else if (receivedData.getType() == 3) { //验证码逻辑
+                responseData.setType(3);
+                if (emailCodeSend(receivedData.getEmail())) {
+                    responseData.setData("EMAIL_SUCCESS");
+                } else {
+                    responseData.setData("EMAIL_FAIL_UNKNOWN");
+                }
+            }
+        } catch (std::exception const& e) {
+            std::cerr << "Exception in handleReceive: " << e.what() << std::endl;
+            responseData.setType(-1);
+        }        
         // 异步发送响应
         boost::asio::async_write(*socket,
                                  boost::asio::buffer(response),
@@ -148,4 +187,9 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         std::cout << "Connection closed by peer" << std::endl;
         // TODO: 清理连接相关资源，如从在线用户列表中移除
     }
+}
+
+bool AuthServer::emailCodeSend(std::string email) {
+    //TODO: 发送邮箱验证码和保存数据的逻辑
+    return true;
 }

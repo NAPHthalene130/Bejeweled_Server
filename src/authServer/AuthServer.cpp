@@ -163,7 +163,8 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         } catch (std::exception const& e) {
             std::cerr << "Exception in handleReceive: " << e.what() << std::endl;
             responseData.setType(-1);
-        }        
+        }
+        response = nlohmann::json(responseData).dump();
         // 异步发送响应
         boost::asio::async_write(*socket,
                                  boost::asio::buffer(response),

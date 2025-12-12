@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.20)
 
 # Function to read .env file
 function(read_env_file FILENAME)
+    message(STATUS "Attempting to read .env file from: ${FILENAME}")
     if(EXISTS "${FILENAME}")
         file(STRINGS "${FILENAME}" ENV_LINES)
         foreach(LINE IN LISTS ENV_LINES)
+            message(STATUS "Processing line: ${LINE}")
             # Skip comments and empty lines
             if(LINE MATCHES "^#" OR LINE STREQUAL "")
                 continue()
@@ -21,6 +23,8 @@ function(read_env_file FILENAME)
                 
                 set(${KEY} "${VALUE}" PARENT_SCOPE)
                 message(STATUS "Loaded env var from .env: ${KEY}=${VALUE}")
+            else()
+                message(STATUS "Ignored line (no match): ${LINE}")
             endif()
         endforeach()
     else()
@@ -49,12 +53,150 @@ if(DEFINED BOOST_ROOT)
     message(STATUS "Using Boost root: ${BOOST_ROOT}")
 endif()
 
+# ==================== MySQL配置部分 - 增强版 ====================
+if(NOT DEFINED MYSQL_ROOT_DIR)
+    message(WARNING "MYSQL_ROOT_DIR is not defined in .env file.")
+    
+    # 尝试系统默认路径
+    if(WIN32)
+        # 尝试多个可能的默认路径
+        set(POSSIBLE_PATHS
+            "C:/Program Files/MySQL/MySQL Connector C++ 8.0"
+            "C:/Program Files/MySQL/MySQL Connector C++ 9.0"
+            "C:/MySQL/connector-c++"
+        )
+        
+        foreach(path IN LISTS POSSIBLE_PATHS)
+            if(EXISTS "${path}")
+                set(MYSQL_ROOT_DIR "${path}")
+                break()
+            endif()
+        endforeach()
+    endif()
+    
+    if(NOT DEFINED MYSQL_ROOT_DIR)
+        message(FATAL_ERROR "MYSQL_ROOT_DIR not set. Please add MYSQL_ROOT_DIR to .env file")
+    endif()
+endif()
+
+message(STATUS "MySQL root directory: ${MYSQL_ROOT_DIR}")
+
+# 验证MYSQL_ROOT_DIR是否存在
+if(NOT EXISTS "${MYSQL_ROOT_DIR}")
+    message(FATAL_ERROR "MYSQL_ROOT_DIR does not exist: ${MYSQL_ROOT_DIR}")
+endif()
+
+# 列出目录内容以帮助调试
+message(STATUS "Contents of MySQL root directory:")
+file(GLOB MYSQL_DIR_CONTENTS "${MYSQL_ROOT_DIR}/*")
+foreach(item IN LISTS MYSQL_DIR_CONTENTS)
+    get_filename_component(item_name "${item}" NAME)
+    message(STATUS "  ${item_name}")
+endforeach()
+
+# 查找include目录
+set(POSSIBLE_INCLUDE_DIRS
+    "${MYSQL_ROOT_DIR}/include"
+    "${MYSQL_ROOT_DIR}/include/mysql-cppconn-9"
+    "${MYSQL_ROOT_DIR}/include/mysql-cppconn-8"
+)
+
+foreach(dir IN LISTS POSSIBLE_INCLUDE_DIRS)
+    if(EXISTS "${dir}")
+        set(MYSQL_INCLUDE_DIR "${dir}")
+        message(STATUS "Found MySQL include directory: ${MYSQL_INCLUDE_DIR}")
+        break()
+    endif()
+endforeach()
+
+if(NOT DEFINED MYSQL_INCLUDE_DIR)
+    message(FATAL_ERROR "Could not find MySQL include directory in any expected location")
+endif()
+
+# 查找库目录 - 尝试多个可能的路径
+set(POSSIBLE_LIB_DIRS
+    "${MYSQL_ROOT_DIR}/lib64/vs16"      # VS2019
+    "${MYSQL_ROOT_DIR}/lib64/vs15"      # VS2017
+    "${MYSQL_ROOT_DIR}/lib64/vs14"      # VS2015
+    "${MYSQL_ROOT_DIR}/lib64"
+    "${MYSQL_ROOT_DIR}/lib/vs16"
+    "${MYSQL_ROOT_DIR}/lib/vs15"
+    "${MYSQL_ROOT_DIR}/lib/vs14"
+    "${MYSQL_ROOT_DIR}/lib"
+)
+
+if(NOT DEFINED MYSQL_LIB_DIR OR NOT EXISTS "${MYSQL_LIB_DIR}")
+    set(MYSQL_LIB_DIR "")
+    foreach(dir IN LISTS POSSIBLE_LIB_DIRS)
+        if(EXISTS "${dir}")
+            set(MYSQL_LIB_DIR "${dir}")
+            message(STATUS "Found MySQL library directory: ${MYSQL_LIB_DIR}")
+            break()
+        endif()
+    endforeach()
+endif()
+
+if(NOT MYSQL_LIB_DIR)
+    message(FATAL_ERROR "Could not find MySQL library directory in any expected location")
+endif()
+
+# 列出库目录中的文件以帮助调试
+message(STATUS "Contents of MySQL library directory ${MYSQL_LIB_DIR}:")
+file(GLOB LIB_FILES "${MYSQL_LIB_DIR}/*")
+foreach(file IN LISTS LIB_FILES)
+    get_filename_component(file_name "${file}" NAME)
+    message(STATUS "  ${file_name}")
+endforeach()
+
+# 可能的库文件名（对于9.5.0版本）
+set(POSSIBLE_LIB_NAMES
+    mysqlcppconn9        # 9.x版本的动态库
+    mysqlcppconn8        # 8.x版本的动态库
+    mysqlcppconn         # 通用名称
+    libmysqlcppconn9     # 带lib前缀
+    libmysqlcppconn8
+    libmysqlcppconn
+    mysqlcppconn9-static # 静态库
+    mysqlcppconn8-static
+    mysqlcppconn-static
+)
+
+# 查找库文件
+find_library(MYSQL_LIBRARY
+    NAMES ${POSSIBLE_LIB_NAMES}
+    PATHS ${MYSQL_LIB_DIR}
+    NO_DEFAULT_PATH
+)
+
+if(NOT MYSQL_LIBRARY)
+    message(FATAL_ERROR "Could not find MySQL library in ${MYSQL_LIB_DIR}. "
+            "Available files listed above. Please check the library name.")
+endif()
+
+message(STATUS "Found MySQL library: ${MYSQL_LIBRARY}")
+
+# 判断是否为静态库
+get_filename_component(LIB_NAME "${MYSQL_LIBRARY}" NAME)
+if(LIB_NAME MATCHES "static" OR LIB_NAME MATCHES "Static")
+    set(MYSQL_STATIC TRUE)
+    message(STATUS "MySQL library is static")
+else()
+    set(MYSQL_STATIC FALSE)
+    message(STATUS "MySQL library is dynamic")
+endif()
+
+set(MySQL_FOUND TRUE)
+set(MySQL_INCLUDE_DIRS ${MYSQL_INCLUDE_DIR})
+set(MySQL_LIBRARIES ${MYSQL_LIBRARY})
+# ==================== MySQL配置结束 ====================
+
 # Find Boost
 find_package(Boost REQUIRED)
 
 # Include directories
 include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${MySQL_INCLUDE_DIRS})
 
 # Gather source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -63,10 +205,6 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(Bejeweled_Server ${SOURCES})
 
 # Link libraries
-# target_link_libraries(Bejeweled_Server PRIVATE ${Boost_LIBRARIES}) 
-# Uncomment above if you need to link against Boost libraries (e.g. filesystem, system, etc.)
-# For header-only Boost libs, it might not be strictly necessary depending on CMake version/targets, 
-# but usually good practice to link Boost::boost or similar if available.
 if(TARGET Boost::boost)
     target_link_libraries(Bejeweled_Server PRIVATE Boost::boost)
 elseif(TARGET Boost::headers)
@@ -75,6 +213,101 @@ else()
     target_include_directories(Bejeweled_Server PRIVATE ${Boost_INCLUDE_DIRS})
 endif()
 
+# 链接MySQL库
+target_link_libraries(Bejeweled_Server PRIVATE ${MySQL_LIBRARIES})
+
+# 静态链接MySQL需要额外的依赖库
+if(MYSQL_STATIC)
+    message(STATUS "Adding static MySQL dependencies")
+    if(WIN32)
+        target_link_libraries(Bejeweled_Server PRIVATE
+            ws2_32
+            crypt32
+            secur32
+            bcrypt
+            advapi32
+        )
+    else()
+        target_link_libraries(Bejeweled_Server PRIVATE
+            ssl
+            crypto
+            z
+        )
+    endif()
+endif()
+
+# 复制MySQL DLL到输出目录（仅Windows且动态链接）
+if(WIN32 AND NOT MYSQL_STATIC)
+    # 查找bin目录
+    set(POSSIBLE_BIN_DIRS
+        "${MYSQL_ROOT_DIR}/bin"
+        "${MYSQL_ROOT_DIR}/bin64"
+        "${MYSQL_ROOT_DIR}/lib64"
+        "${MYSQL_ROOT_DIR}/lib"
+    )
+    
+    set(MYSQL_BIN_DIR "")
+    foreach(dir IN LISTS POSSIBLE_BIN_DIRS)
+        if(EXISTS "${dir}")
+            set(MYSQL_BIN_DIR "${dir}")
+            message(STATUS "Found MySQL binary directory: ${MYSQL_BIN_DIR}")
+            break()
+        endif()
+    endforeach()
+    
+    if(MYSQL_BIN_DIR)
+        # 可能的DLL文件名
+        set(POSSIBLE_DLL_NAMES
+            "mysqlcppconn9.dll"
+            "mysqlcppconn8.dll"
+            "mysqlcppconn.dll"
+            "libmysqlcppconn9.dll"
+            "libmysqlcppconn8.dll"
+            "libmysqlcppconn.dll"
+        )
+        
+        foreach(dll_name IN LISTS POSSIBLE_DLL_NAMES)
+            set(dll_path "${MYSQL_BIN_DIR}/${dll_name}")
+            if(EXISTS "${dll_path}")
+                add_custom_command(TARGET Bejeweled_Server POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${dll_path}"
+                    $<TARGET_FILE_DIR:Bejeweled_Server>
+                    COMMENT "Copying ${dll_name}"
+                )
+                message(STATUS "Will copy ${dll_name} to output directory")
+                break()
+            endif()
+        endforeach()
+        
+        # 复制其他可能的依赖DLL
+        file(GLOB MYSQL_DLLS "${MYSQL_BIN_DIR}/*.dll")
+        foreach(dll_file IN LISTS MYSQL_DLLS)
+            add_custom_command(TARGET Bejeweled_Server POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${dll_file}"
+                $<TARGET_FILE_DIR:Bejeweled_Server>
+                COMMENT "Copying $(notdir ${dll_file})"
+            )
+        endforeach()
+    endif()
+endif()
+
+# Windows网络库
 if(WIN32)
     target_link_libraries(Bejeweled_Server PRIVATE ws2_32 mswsock)
 endif()
+
+# 打印配置摘要
+message(STATUS "========================================")
+message(STATUS "Project: ${PROJECT_NAME}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "Boost found: ${Boost_FOUND}")
+message(STATUS "MySQL found: ${MySQL_FOUND}")
+if(MySQL_FOUND)
+    message(STATUS "MySQL include dir: ${MySQL_INCLUDE_DIRS}")
+    message(STATUS "MySQL library: ${MySQL_LIBRARIES}")
+    message(STATUS "MySQL static: ${MYSQL_STATIC}")
+endif()
+message(STATUS "========================================")

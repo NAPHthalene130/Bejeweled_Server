@@ -5,12 +5,44 @@
 #include <string>
 #include "../Config.h"
 
+bool SqlUtil::comparePassword(std::string passwordInDB, std::string password) {
+    //TODO: 密码比较逻辑
+    return true;
+}
+
 int SqlUtil::authPasswordFromPlayerinfo(std::string playerID, std::string password) {
-    //1 成功
-    //2 失败
-    //3 未知错误
-    //TODO 具体实现逻辑
-    return 1;
+    try {
+        sql::mysql::MySQL_Driver *driver;
+        sql::Connection *conn;
+        sql::Statement *stmt;
+        sql::ResultSet *res;
+        driver = sql::mysql::get_mysql_driver_instance();
+        conn = driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword);
+        conn->setSchema("bejeweled");
+        stmt = conn->createStatement();
+        res = stmt->executeQuery("SELECT password FROM playerinfo WHERE playerID = '" + playerID + "'");
+        if (res->next()) {
+            std::string pwGetFromDB = res->getString("password");
+            bool compareFlag = comparePassword(pwGetFromDB, password);
+            delete res;
+            delete stmt;
+            delete conn;
+            if (compareFlag) {
+                return 1;
+            } else {
+                return 2;
+            }
+        } else {
+            delete res;
+            delete stmt;
+            delete conn;
+            return 2;
+        }
+    } catch (sql::SQLException &e) {
+        return 3;
+    } catch (...) {
+        return 3;
+    }
 }
 
 int SqlUtil::registerFromPlayerinfo(std::string playerID, std::string password, std::string email, std::string styleSet, std::string emailCode) {

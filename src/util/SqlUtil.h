@@ -6,14 +6,12 @@
 
 class SqlUtil {
 public:
-    static std::string getPlayerIDfromPlayerinfo();
-    static std::string getPlayerPasswordfromPlayerinfo();
-    static std::string getEmailfromPlayerinfo();
-    static std::string getStyleSetfromPlayerinfo();
-    static void setPlayerIDfromPlayerinfo();
-    static void setPlayerPasswordfromPlayerinfo();
-    static void setEmailfromPlayerinfo();
-    static void setStyleSetfromPlayerinfo();
+    static std::string getPlayerPasswordByPlayerIDfromPlayerinfo(std::string playerID);
+    static std::string getEmailByPlayerIDfromPlayerinfo(std::string playerID);
+    static std::string getStyleSetByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setPlayerPasswordByPlayerIDfromPlayerinfo(std::string playerID, std::string password);
+    static void setEmailByPlayerIDfromPlayerinfo(std::string playerID, std::string email);
+    static void setStyleSetByPlayerIDfromPlayerinfo(std::string playerID, std::string styleSet);
     static int authPasswordFromPlayerinfo(std::string playerID, std::string password);
     static int registerFromPlayerinfo(std::string playerID, std::string password, std::string email, std::string styleSet, std::string emailCode);
 };

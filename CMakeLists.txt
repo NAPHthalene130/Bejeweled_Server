@@ -15,6 +15,7 @@ function(read_env_file FILENAME)
             if(LINE MATCHES "^([^=]+)=(.*)$")
                 set(KEY "${CMAKE_MATCH_1}")
                 set(VALUE "${CMAKE_MATCH_2}")
+                
                 string(STRIP "${KEY}" KEY)
                 string(STRIP "${VALUE}" VALUE)
                 # Remove quotes if present
@@ -86,26 +87,23 @@ if(NOT EXISTS "${MYSQL_ROOT_DIR}")
     message(FATAL_ERROR "MYSQL_ROOT_DIR does not exist: ${MYSQL_ROOT_DIR}")
 endif()
 
-# 列出目录内容以帮助调试
-message(STATUS "Contents of MySQL root directory:")
-file(GLOB MYSQL_DIR_CONTENTS "${MYSQL_ROOT_DIR}/*")
-foreach(item IN LISTS MYSQL_DIR_CONTENTS)
-    get_filename_component(item_name "${item}" NAME)
-    message(STATUS "  ${item_name}")
-endforeach()
-
 # 查找include目录
 set(POSSIBLE_INCLUDE_DIRS
-    "${MYSQL_ROOT_DIR}/include"
+    "${MYSQL_ROOT_DIR}/include"                          # 默认路径 (应包含 mysql_driver.h)
+    "${MYSQL_ROOT_DIR}/include/mysql"                    # 某些版本会多一层 mysql 目录
     "${MYSQL_ROOT_DIR}/include/mysql-cppconn-9"
     "${MYSQL_ROOT_DIR}/include/mysql-cppconn-8"
 )
 
+set(MYSQL_INCLUDE_DIR "")
 foreach(dir IN LISTS POSSIBLE_INCLUDE_DIRS)
     if(EXISTS "${dir}")
-        set(MYSQL_INCLUDE_DIR "${dir}")
-        message(STATUS "Found MySQL include directory: ${MYSQL_INCLUDE_DIR}")
-        break()
+        # 额外检查关键文件是否存在，确认这是一个正确的包含目录
+        if(EXISTS "${dir}/mysql_driver.h" OR EXISTS "${dir}/mysqlx/xdevapi.h")
+            set(MYSQL_INCLUDE_DIR "${dir}")
+            message(STATUS "Found MySQL include directory: ${MYSQL_INCLUDE_DIR}")
+            break()
+        endif()
     endif()
 endforeach()
 
@@ -117,7 +115,7 @@ endif()
 set(POSSIBLE_LIB_DIRS
     "${MYSQL_ROOT_DIR}/lib64/vs16"      # VS2019
     "${MYSQL_ROOT_DIR}/lib64/vs15"      # VS2017
-    "${MYSQL_ROOT_DIR}/lib64/vs14"      # VS2015
+    "${MYSQL_ROOT_DIR}/lib64/vs14"      # VS2015 <--- 您的 .env 文件指向这里
     "${MYSQL_ROOT_DIR}/lib64"
     "${MYSQL_ROOT_DIR}/lib/vs16"
     "${MYSQL_ROOT_DIR}/lib/vs15"
@@ -125,7 +123,10 @@ set(POSSIBLE_LIB_DIRS
     "${MYSQL_ROOT_DIR}/lib"
 )
 
-if(NOT DEFINED MYSQL_LIB_DIR OR NOT EXISTS "${MYSQL_LIB_DIR}")
+# 使用 .env 中定义的 MYSQL_LIB_DIR (如果存在)
+if(DEFINED MYSQL_LIB_DIR AND EXISTS "${MYSQL_LIB_DIR}")
+    message(STATUS "Using explicitly defined MySQL library directory: ${MYSQL_LIB_DIR}")
+else()
     set(MYSQL_LIB_DIR "")
     foreach(dir IN LISTS POSSIBLE_LIB_DIRS)
         if(EXISTS "${dir}")
@@ -139,14 +140,6 @@ endif()
 if(NOT MYSQL_LIB_DIR)
     message(FATAL_ERROR "Could not find MySQL library directory in any expected location")
 endif()
-
-# 列出库目录中的文件以帮助调试
-message(STATUS "Contents of MySQL library directory ${MYSQL_LIB_DIR}:")
-file(GLOB LIB_FILES "${MYSQL_LIB_DIR}/*")
-foreach(file IN LISTS LIB_FILES)
-    get_filename_component(file_name "${file}" NAME)
-    message(STATUS "  ${file_name}")
-endforeach()
 
 # 可能的库文件名（对于9.5.0版本）
 set(POSSIBLE_LIB_NAMES
@@ -169,8 +162,17 @@ find_library(MYSQL_LIBRARY
 )
 
 if(NOT MYSQL_LIBRARY)
+    # 列出库目录中的文件以帮助调试
+    message(STATUS "Contents of MySQL library directory ${MYSQL_LIB_DIR}:")
+    file(GLOB LIB_FILES "${MYSQL_LIB_DIR}/*")
+    foreach(file IN LISTS LIB_FILES)
+        get_filename_component(file_name "${file}" NAME)
+        message(STATUS "  ${file_name}")
+    endforeach()
+    
     message(FATAL_ERROR "Could not find MySQL library in ${MYSQL_LIB_DIR}. "
-            "Available files listed above. Please check the library name.")
+            "Available files listed above. Please check the library name."
+    )
 endif()
 
 message(STATUS "Found MySQL library: ${MYSQL_LIBRARY}")
@@ -196,7 +198,7 @@ find_package(Boost REQUIRED)
 # Include directories
 include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${MySQL_INCLUDE_DIRS})
+include_directories(${MySQL_INCLUDE_DIRS}) # <--- 最终添加包含路径
 
 # Gather source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -266,6 +268,7 @@ if(WIN32 AND NOT MYSQL_STATIC)
             "libmysqlcppconn.dll"
         )
         
+        set(DLL_COPIED FALSE)
         foreach(dll_name IN LISTS POSSIBLE_DLL_NAMES)
             set(dll_path "${MYSQL_BIN_DIR}/${dll_name}")
             if(EXISTS "${dll_path}")
@@ -276,19 +279,24 @@ if(WIN32 AND NOT MYSQL_STATIC)
                     COMMENT "Copying ${dll_name}"
                 )
                 message(STATUS "Will copy ${dll_name} to output directory")
+                set(DLL_COPIED TRUE)
                 break()
             endif()
         endforeach()
-        
+      
         # 复制其他可能的依赖DLL
         file(GLOB MYSQL_DLLS "${MYSQL_BIN_DIR}/*.dll")
         foreach(dll_file IN LISTS MYSQL_DLLS)
-            add_custom_command(TARGET Bejeweled_Server POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${dll_file}"
-                $<TARGET_FILE_DIR:Bejeweled_Server>
-                COMMENT "Copying $(notdir ${dll_file})"
-            )
+            get_filename_component(dll_name_only "${dll_file}" NAME)
+            # 避免重复复制主要的conn DLL
+            if(NOT DLL_COPIED OR NOT "${dll_name_only}" IN_LIST POSSIBLE_DLL_NAMES)
+                add_custom_command(TARGET Bejeweled_Server POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${dll_file}"
+                    $<TARGET_FILE_DIR:Bejeweled_Server>
+                    COMMENT "Copying ${dll_name_only}"
+                )
+            endif()
         endforeach()
     endif()
 endif()

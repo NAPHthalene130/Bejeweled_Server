@@ -224,19 +224,23 @@ if(MSVC AND WIN32 AND NOT MYSQL_STATIC)
         endforeach()
         
         if(MYSQL_BIN_DIR)
-            # 可能的DLL文件名
-            set(POSSIBLE_DLL_NAMES
-                "mysqlcppconn9.dll"
-                "mysqlcppconn8.dll"
-                "mysqlcppconn.dll"
-                "libmysqlcppconn9.dll"
-                "libmysqlcppconn8.dll"
-                "libmysqlcppconn.dll"
+            # 明确指定需要复制的DLL列表 (针对 Connector/C++ 9.5.0)
+            set(REQUIRED_DLLS
+                "mysqlcppconn-10-vs14.dll"
+                "mysqlcppconnx-2-vs14.dll"
+                "libcrypto-3-x64.dll"
+                "libssl-3-x64.dll"
             )
             
-            set(DLL_COPIED FALSE)
-            foreach(dll_name IN LISTS POSSIBLE_DLL_NAMES)
+            # 尝试复制每个DLL
+            foreach(dll_name IN LISTS REQUIRED_DLLS)
+                # 先在bin目录找
                 set(dll_path "${MYSQL_BIN_DIR}/${dll_name}")
+                if(NOT EXISTS "${dll_path}")
+                    # 找不到再去lib64目录找 (Connector/C++ 9.5 似乎把部分dll放在lib64)
+                    set(dll_path "${MYSQL_ROOT_DIR}/lib64/${dll_name}")
+                endif()
+
                 if(EXISTS "${dll_path}")
                     add_custom_command(TARGET Bejeweled_Server POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -244,9 +248,9 @@ if(MSVC AND WIN32 AND NOT MYSQL_STATIC)
                         $<TARGET_FILE_DIR:Bejeweled_Server>
                         COMMENT "Copying ${dll_name}"
                     )
-                    message(STATUS "Will copy ${dll_name} to output directory")
-                    set(DLL_COPIED TRUE)
-                    break()
+                    message(STATUS "Configured to copy ${dll_name}")
+                else()
+                    message(WARNING "Could not find DLL: ${dll_name} in ${MYSQL_BIN_DIR} or lib64")
                 endif()
             endforeach()
         endif()

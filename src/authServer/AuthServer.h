@@ -5,7 +5,12 @@
 #include <thread>
 #include <vector>
 #include <atomic>
+#include <string>
 #include <boost/asio.hpp>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
 
 class AuthServer {
     using tcp = boost::asio::ip::tcp;
@@ -30,6 +35,12 @@ private:
     std::vector<std::thread> workerThreads;
     std::atomic<bool> stopped{false};
     bool emailCodeSend(std::string email);
+
+    // RSA related
+    std::string publicKey;
+    std::string privateKey;
+    void generateKeys();
+    std::string rsaDecryptBase64(const std::string& cipherTextBase64);
 };
 
 #endif // AUTH_SERVER_H

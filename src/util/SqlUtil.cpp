@@ -14,6 +14,9 @@ bool SqlUtil::authEmailCode(std::string emailCode, std::string email) {
 }
 
 int SqlUtil::authPasswordFromPlayerinfo(std::string playerID, std::string password) {
+    //测试
+    return 1;
+    //以上测试
     try {
         sql::mysql::MySQL_Driver *driver;
         sql::Connection *conn;

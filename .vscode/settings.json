@@ -1,0 +1,9 @@
+{
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}",
+        "--background-index",
+        "-j=12",
+        "--query-driver=H:/vcpkg/downloads/tools/msvc/14.29.30133/bin/Hostx64/x64/cl.exe"
+    ]
+}

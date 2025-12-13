@@ -153,9 +153,17 @@ endif()
 # Find Boost
 find_package(Boost REQUIRED)
 
+# Find OpenSSL via vcpkg
+find_package(OpenSSL REQUIRED)
+message(STATUS "OpenSSL found: ${OPENSSL_FOUND}")
+message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
+
 # Include directories
 include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
+if(OPENSSL_FOUND)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
 if(MSVC)
     include_directories(${MySQL_INCLUDE_DIRS})
 endif()
@@ -177,6 +185,11 @@ endif()
 
 # 链接MySQL库
 target_link_libraries(Bejeweled_Server PRIVATE ${MySQL_LIBRARIES})
+
+# Link OpenSSL
+if(OPENSSL_FOUND)
+    target_link_libraries(Bejeweled_Server PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+endif()
 
 # 对于Windows，添加必要的系统库
 if(WIN32)

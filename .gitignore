@@ -99,7 +99,8 @@ CMakeLists.txt.user*
 
 #Config
 ./src/Config.h
+src/Config.h
 
 #Cache
 ./cache
-src/Config.h
+.VSCodeCounter

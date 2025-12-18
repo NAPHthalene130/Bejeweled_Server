@@ -134,8 +134,43 @@ elseif(MINGW)
     # 为静态链接添加定义
     add_definitions(-DSTATIC_CONCPP)
     
+elseif(UNIX)
+    message(STATUS "Configuring for UNIX/Linux")
+    
+    # Try to find MySQL Connector/C++
+    find_path(MYSQL_INCLUDE_DIR mysql/jdbc.h
+        PATHS 
+        /usr/include/mysql-cppconn-8
+        /usr/local/include/mysql-cppconn-8
+        /usr/include
+        /usr/local/include
+    )
+    
+    find_library(MYSQL_LIBRARY_JDBC mysqlcppconn
+        PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu
+    )
+    
+    # Try to find X DevAPI library (usually libmysqlcppconn8)
+    find_library(MYSQL_LIBRARY_XDEVAPI mysqlcppconn8
+        PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu
+    )
+    
+    if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY_JDBC)
+        set(MySQL_FOUND TRUE)
+        set(MySQL_INCLUDE_DIRS ${MYSQL_INCLUDE_DIR})
+        set(MySQL_LIBRARIES ${MYSQL_LIBRARY_JDBC})
+        if(MYSQL_LIBRARY_XDEVAPI)
+            list(APPEND MySQL_LIBRARIES ${MYSQL_LIBRARY_XDEVAPI})
+        endif()
+        set(MYSQL_STATIC FALSE)
+        message(STATUS "Found MySQL Include: ${MYSQL_INCLUDE_DIR}")
+        message(STATUS "Found MySQL Libs: ${MySQL_LIBRARIES}")
+    else()
+        message(FATAL_ERROR "MySQL Connector/C++ not found. Please install libmysqlcppconn-dev.")
+    endif()
+
 else()
-    message(FATAL_ERROR "Unsupported compiler. Only MSVC and MinGW are supported.")
+    message(FATAL_ERROR "Unsupported compiler. Only MSVC, MinGW and Unix are supported.")
 endif()
 
 message(STATUS "MySQL found: ${MySQL_FOUND}")
@@ -164,7 +199,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 if(OPENSSL_FOUND)
     include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
-if(MSVC)
+if(MySQL_FOUND)
     include_directories(${MySQL_INCLUDE_DIRS})
 endif()
 

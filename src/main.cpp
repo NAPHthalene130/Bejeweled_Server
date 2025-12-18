@@ -1,7 +1,9 @@
 #include <iostream>
 #include "authServer/AuthServer.h"
+#include "util/Config.h"
 
 int main() {
+    Config::loadEnv();
     try {
         unsigned short port = 10086;
         AuthServer server(port);

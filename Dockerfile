@@ -1,10 +1,10 @@
-# Use Ubuntu 22.04 LTS as the base image
-FROM ubuntu:22.04
+# ========== Build Stage ==========
+FROM ubuntu:22.04 AS builder
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update package list and install build dependencies
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -17,19 +17,38 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy the project files
+# Copy source code
 COPY . .
 
-# Create build directory
-RUN mkdir -p build
-
 # Build the project
-WORKDIR /app/build
-RUN cmake .. && make -j$(nproc)
+RUN mkdir -p build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc)
+
+# ========== Runtime Stage ==========
+FROM ubuntu:22.04
+
+# Avoid prompts from apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install runtime dependencies
+# We install the dev packages or libraries needed for runtime execution
+RUN apt-get update && apt-get install -y \
+    libboost-system-dev \
+    libboost-thread-dev \
+    libssl-dev \
+    libmysqlcppconn-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy the executable from the builder stage
+COPY --from=builder /app/build/Bejeweled_Server .
 
 # Expose the server port
 EXPOSE 10086
 
 # Run the server
-# You should pass environment variables for DB connection at runtime
 CMD ["./Bejeweled_Server"]

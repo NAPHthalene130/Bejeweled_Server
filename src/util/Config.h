@@ -2,25 +2,16 @@
 #define CONFIG_H
 
 #include <string>
-#include <cstdlib>
-#include <iostream>
 
 class Config {
 public:
-    // Default values
+    // 使用 inline static 允许在头文件中直接初始化，方便配置，且不会导致多重定义错误 (需C++17及以上)
     inline static std::string sqlIP = "127.0.0.1";
-    inline static int sqlPort = 33060;
+    inline static int sqlPort = 3306;
     inline static std::string sqlUsername = "root";
-    inline static std::string sqlPassword = "password";
+    inline static std::string sqlPassword = "123456";
 
-    static void loadEnv() {
-        if (const char* env_p = std::getenv("DB_HOST")) sqlIP = env_p;
-        if (const char* env_p = std::getenv("DB_PORT")) sqlPort = std::stoi(env_p);
-        if (const char* env_p = std::getenv("DB_USER")) sqlUsername = env_p;
-        if (const char* env_p = std::getenv("DB_PASS")) sqlPassword = env_p;
-        
-        std::cout << "Loaded Config: IP=" << sqlIP << " Port=" << sqlPort << " User=" << sqlUsername << std::endl;
-    }
+    static void loadEnv();
 };
 
 #endif // CONFIG_H

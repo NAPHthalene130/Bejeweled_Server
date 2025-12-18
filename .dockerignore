@@ -1,0 +1,28 @@
+# Ignore build artifacts
+build/
+bin/
+*.exe
+*.obj
+*.lib
+*.dll
+*.pdb
+*.ilk
+*.exp
+
+# Ignore IDE configs
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+
+# Ignore Git
+.git/
+.gitignore
+
+# Ignore local env files (safety)
+.env
+
+# Ignore system files
+Thumbs.db
+Desktop.ini

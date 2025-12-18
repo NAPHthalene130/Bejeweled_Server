@@ -9,7 +9,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
-#include "../Config.h"
+#include "Config.h"
 
 // Helper: Convert binary data to hex string
 static std::string toHex(const std::vector<unsigned char>& data) {

@@ -3,7 +3,9 @@
 #include <functional>
 #include "json.hpp"
 #include "../util/SqlUtil.h"
+
 using json = nlohmann::json;
+
 AuthServer::AuthServer(unsigned short port)
     : acceptor(ioContext, tcp::endpoint(tcp::v4(), port)) {
     // Generate RSA keys on startup
@@ -12,7 +14,7 @@ AuthServer::AuthServer(unsigned short port)
     // Test DB connection
     SqlUtil::testConnection();
 
-    // 设置套接字重用选项，避免端口占用问题
+    // Set socket reuse address option
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     startAccept();
     std::cout << "AuthServer listening on port " << port << std::endl;
@@ -23,7 +25,7 @@ AuthServer::~AuthServer() {
 }
 
 void AuthServer::run() {
-    // 1. 创建工作线程池（数量通常为CPU核心数）
+    // 1. Create worker thread pool
     std::size_t threadPoolSize = std::thread::hardware_concurrency();
     if (threadPoolSize == 0) threadPoolSize = 2;
     
@@ -34,7 +36,7 @@ void AuthServer::run() {
         workerThreads.emplace_back([this, i]() {
             try {
                 std::cout << "Worker thread " << i << " started" << std::endl;
-                // 所有线程共享ioContext，run()会阻塞直到ioContext停止
+                // Run ioContext
                 ioContext.run();
                 std::cout << "Worker thread " << i << " exited" << std::endl;
             } catch (const std::exception& e) {
@@ -43,9 +45,9 @@ void AuthServer::run() {
         });
     }
     
-    // 2. 主线程等待所有工作线程结束
-    for (auto& thread : workerThreads) {
-        if (thread.joinable()) thread.join();
+    // 2. Wait for all worker threads
+    for (auto& t : workerThreads) {
+        if (t.joinable()) t.join();
     }
     
     std::cout << "All worker threads have finished" << std::endl;
@@ -55,14 +57,14 @@ void AuthServer::stop() {
     if (!stopped.exchange(true)) {
         std::cout << "Stopping server..." << std::endl;
         
-        // 先停止接受新连接
+        // Stop accepting new connections
         boost::system::error_code ec;
         acceptor.close(ec);
         if (ec) {
             std::cerr << "Error closing acceptor: " << ec.message() << std::endl;
         }
         
-        // 停止ioContext，这将导致所有异步操作取消
+        // Stop ioContext
         ioContext.stop();
     }
 }
@@ -82,8 +84,8 @@ void AuthServer::handleAccept(std::shared_ptr<tcp::socket> socket,
                                  const boost::system::error_code& error) {
     if (!error && !stopped) {
         try {
-            // 设置套接字选项
-            socket->set_option(boost::asio::ip::tcp::no_delay(true)); // 禁用Nagle算法
+            // Set socket options
+            socket->set_option(boost::asio::ip::tcp::no_delay(true)); 
             
             std::cout << "New connection from: "
                       << socket->remote_endpoint().address().to_string()
@@ -94,7 +96,7 @@ void AuthServer::handleAccept(std::shared_ptr<tcp::socket> socket,
             std::cerr << "Error setting socket options: " << e.what() << std::endl;
         }
         
-        // 继续接受下一个连接
+        // Continue accepting
         startAccept();
     } else if (error) {
         if (error != boost::asio::error::operation_aborted) {
@@ -106,8 +108,8 @@ void AuthServer::handleAccept(std::shared_ptr<tcp::socket> socket,
 void AuthServer::startReceive(std::shared_ptr<tcp::socket> socket) {
     if (stopped) return;
     
-    // 使用shared_ptr管理缓冲区，确保其生命周期覆盖整个异步操作链
-    auto buffer = std::make_shared<std::vector<char>>(4096); // 4KB缓冲区
+    // Use shared_ptr for buffer
+    auto buffer = std::make_shared<std::vector<char>>(4096); 
     
     socket->async_read_some(boost::asio::buffer(*buffer),
         [this, socket, buffer](const boost::system::error_code& error,
@@ -123,7 +125,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
     if (stopped) return;
     
     if (!error) {
-        // 处理接收到的数据
+        // Handle received data
         std::string receivedStr(buffer->data(), bytesTransferred);
         std::cout << "Received " << bytesTransferred << " bytes: " 
                   << receivedStr << std::endl;
@@ -131,16 +133,29 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         AuthNetData receivedData;
         bool parseSuccess = false;
 
-        // 尝试1：假设是普通的JSON字符串
+        // Attempt 1: Assume plain JSON string
         try {
             auto j = nlohmann::json::parse(receivedStr);
             receivedData = j.get<AuthNetData>();
             parseSuccess = true;
         } catch (...) {
-            // JSON解析失败，可能是加密数据
+            // Failed
         }
 
-        // 尝试2：假设是加密后的Base64字符串
+        // Attempt 2: Assume Base64 encoded JSON (Unencrypted)
+        if (!parseSuccess) {
+            try {
+                std::string decoded = base64Decode(receivedStr);
+                auto j = nlohmann::json::parse(decoded);
+                receivedData = j.get<AuthNetData>();
+                parseSuccess = true;
+                std::cout << "Base64 decoded data successfully (No RSA)." << std::endl;
+            } catch (...) {
+                // Ignore
+            }
+        }
+
+        // Attempt 3: Assume RSA Encrypted Base64
         if (!parseSuccess) {
             try {
                 std::string decrypted = rsaDecryptBase64(receivedStr);
@@ -160,36 +175,35 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         if (parseSuccess) {
             try {
                 if (receivedData.getType() == 0 && receivedData.getData() == "KEY_REQUEST") {
-                    // 0: 请求公钥
+                    // 0: Request Public Key
                     responseData.setType(0);
                     responseData.setData(publicKey);
                     std::cout << "Sent Public Key." << std::endl;
-                } else if (receivedData.getType() == 1) { //登录逻辑
+                } else if (receivedData.getType() == 1) { // Login
                     responseData.setType(1);
                     int authResult = SqlUtil::authPasswordFromPlayerinfo(receivedData.getId(), receivedData.getPassword());
-                    if (authResult == 1) { //1 登录成功
+                    if (authResult == 1) { // Success
                         responseData.setData("LOGIN_SUCCESS");
-                    } else if (authResult == 2) { //2 登录失败
+                    } else if (authResult == 2) { // Fail
                         responseData.setData("LOGIN_FAIL");
-                    } else if (authResult == 3) { //3 其它错误
+                    } else if (authResult == 3) { // Error
                         responseData.setData("LOGIN_FAIL");
                     }
-                } else if (receivedData.getType() == 2) { //注册逻辑
+                } else if (receivedData.getType() == 2) { // Register
                     responseData.setType(2);
-                    // styleSet 默认为空字符串，emailCode 从 data 获取
                     int registerResult = SqlUtil::registerFromPlayerinfo(receivedData.getId(), receivedData.getPassword(), receivedData.getEmail(), "", receivedData.getData());
-                    if (registerResult == 1) { //1 注册成功
+                    if (registerResult == 1) { // Success
                         responseData.setData("REGISTER_SUCCESS");
-                    } else if (registerResult == 2) { //2 邮箱验证码错误
+                    } else if (registerResult == 2) { // Email Code Error
                         responseData.setData("REGISTER_FAIL_EMAILCODE");
-                    } else if (registerResult == 3) { //3 账号已存在
+                    } else if (registerResult == 3) { // Account Exists
                         responseData.setData("REGISTER_FAIL_ACCOUNT");
-                    } else if (registerResult == 4) {  //4 邮箱已存在
+                    } else if (registerResult == 4) {  // Email Exists
                         responseData.setData("REGISTER_FAIL_EMAIL");
-                    } else if (registerResult == 5) { //5 其它错误
+                    } else if (registerResult == 5) { // Unknown Error
                         responseData.setData("REGISTER_FAIL_UNKNOWN");
                     }
-                } else if (receivedData.getType() == 3) { //验证码逻辑
+                } else if (receivedData.getType() == 3) { // Verify Code
                     responseData.setType(3);
                     if (emailCodeSend(receivedData.getEmail())) {
                         responseData.setData("EMAIL_SUCCESS");
@@ -206,7 +220,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         }
 
         response = nlohmann::json(responseData).dump();
-        // 异步发送响应
+        // Async write response
         boost::asio::async_write(*socket,
                                  boost::asio::buffer(response),
                                  [socket](const boost::system::error_code& writeError,
@@ -218,21 +232,20 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                      }
                                  });
         
-        // 继续接收下一条消息（形成异步操作链）
+        // Continue receive
         startReceive(socket);
     } else if (error != boost::asio::error::eof) {
         if (error != boost::asio::error::operation_aborted) {
             std::cerr << "Receive error: " << error.message() << std::endl;
         }
     } else {
-        // 对方关闭连接
+        // Connection closed
         std::cout << "Connection closed by peer" << std::endl;
-        // TODO: 清理连接相关资源，如从在线用户列表中移除
     }
 }
 
 bool AuthServer::emailCodeSend(std::string email) {
-    //TODO: 发送邮箱验证码和保存数据的逻辑
+    // TODO: Email sending logic
     return true;
 }
 
@@ -370,4 +383,24 @@ std::string AuthServer::rsaDecryptBase64(const std::string& cipherTextBase64) {
     EVP_PKEY_free(pkey);
     
     return out;
+}
+
+std::string AuthServer::base64Decode(const std::string& encoded) {
+    BIO *bio, *b64;
+    int decodeLen = encoded.length();
+    std::vector<char> decodedData(decodeLen); 
+    
+    bio = BIO_new_mem_buf(encoded.data(), -1);
+    b64 = BIO_new(BIO_f_base64());
+    bio = BIO_push(b64, bio);
+    
+    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); 
+    int decodedSize = BIO_read(bio, decodedData.data(), encoded.length());
+    BIO_free_all(bio);
+    
+    if (decodedSize <= 0) {
+        throw std::runtime_error("Base64 decode failed");
+    }
+    
+    return std::string(decodedData.data(), decodedSize);
 }

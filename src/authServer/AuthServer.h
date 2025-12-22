@@ -41,6 +41,7 @@ private:
     std::string privateKey;
     void generateKeys();
     std::string rsaDecryptBase64(const std::string& cipherTextBase64);
+    std::string base64Decode(const std::string& encoded);
 };
 
 #endif // AUTH_SERVER_H

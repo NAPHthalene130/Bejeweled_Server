@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
-    libboost-all-dev \
+    libboost-system-dev \
+    libboost-thread-dev \
     libssl-dev \
     libmysqlcppconn-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -32,12 +33,12 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies
-# We install the dev packages or libraries needed for runtime execution
+# We install the runtime libraries corresponding to the dev packages used in build
 RUN apt-get update && apt-get install -y \
-    libboost-system-dev \
-    libboost-thread-dev \
-    libssl-dev \
-    libmysqlcppconn-dev \
+    libboost-system1.74.0 \
+    libboost-thread1.74.0 \
+    libssl3 \
+    libmysqlcppconn7v5 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

@@ -29,17 +29,7 @@ void GameNetData::setIdToNum(const std::map<std::string, int>& IdToNum) { this->
 std::map<int, std::string> GameNetData::getNumToId() const { return NumToId; }
 void GameNetData::setNumToId(const std::map<int, std::string>& NumToId) { this->NumToId = NumToId; }
 
-std::vector<std::vector<int>> GameNetData::getPlayer1Board() const { return player1Board; }
-void GameNetData::setPlayer1Board(const std::vector<std::vector<int>>& player1Board) { this->player1Board = player1Board; }
 
-std::vector<std::vector<int>> GameNetData::getPlayer2Board() const { return player2Board; }
-void GameNetData::setPlayer2Board(const std::vector<std::vector<int>>& player2Board) { this->player2Board = player2Board; }
-
-std::vector<std::vector<int>> GameNetData::getPlayer3Board() const { return player3Board; }
-void GameNetData::setPlayer3Board(const std::vector<std::vector<int>>& player3Board) { this->player3Board = player3Board; }
-
-std::vector<std::vector<int>> GameNetData::getPlayer4Board() const { return player4Board; }
-void GameNetData::setPlayer4Board(const std::vector<std::vector<int>>& player4Board) { this->player4Board = player4Board; }
 
 std::vector<std::vector<int>> GameNetData::getMyBoard() const { return myBoard; }
 void GameNetData::setMyBoard(const std::vector<std::vector<int>>& myBoard) { this->myBoard = myBoard; }
@@ -59,6 +49,12 @@ void GameNetData::setPlayer4Score(int player4Score) { this->player4Score = playe
 int GameNetData::getMyScore() const { return myScore; }
 void GameNetData::setMyScore(int myScore) { this->myScore = myScore; }
 
+int GameNetData::getSeconds() const { return seconds; }
+void GameNetData::setSeconds(int seconds) { this->seconds = seconds; }
+
+std::vector<std::pair<int,int>> GameNetData::getCoordinates() const { return coordinates; }
+void GameNetData::setCoordinates(const std::vector<std::pair<int,int>>& coordinates) { this->coordinates = coordinates; }
+
 void to_json(nlohmann::json& j, const GameNetData& p) {
     j = nlohmann::json{
         {"type", p.type},
@@ -66,16 +62,15 @@ void to_json(nlohmann::json& j, const GameNetData& p) {
         {"data", p.data},
         {"IdToNum", p.IdToNum},
         {"NumToId", p.NumToId},
-        {"player1Board", p.player1Board},
-        {"player2Board", p.player2Board},
-        {"player3Board", p.player3Board},
-        {"player4Board", p.player4Board},
+
         {"myBoard", p.myBoard},
         {"player1Score", p.player1Score},
         {"player2Score", p.player2Score},
         {"player3Score", p.player3Score},
         {"player4Score", p.player4Score},
-        {"myScore", p.myScore}
+        {"myScore", p.myScore},
+        {"seconds", p.seconds},
+        {"coordinates", p.coordinates}
     };
 }
 
@@ -85,14 +80,13 @@ void from_json(const nlohmann::json& j, GameNetData& p) {
     if (j.contains("data")) j.at("data").get_to(p.data);
     if (j.contains("IdToNum")) j.at("IdToNum").get_to(p.IdToNum);
     if (j.contains("NumToId")) j.at("NumToId").get_to(p.NumToId);
-    if (j.contains("player1Board")) j.at("player1Board").get_to(p.player1Board);
-    if (j.contains("player2Board")) j.at("player2Board").get_to(p.player2Board);
-    if (j.contains("player3Board")) j.at("player3Board").get_to(p.player3Board);
-    if (j.contains("player4Board")) j.at("player4Board").get_to(p.player4Board);
+
     if (j.contains("myBoard")) j.at("myBoard").get_to(p.myBoard);
     if (j.contains("player1Score")) j.at("player1Score").get_to(p.player1Score);
     if (j.contains("player2Score")) j.at("player2Score").get_to(p.player2Score);
     if (j.contains("player3Score")) j.at("player3Score").get_to(p.player3Score);
     if (j.contains("player4Score")) j.at("player4Score").get_to(p.player4Score);
     if (j.contains("myScore")) j.at("myScore").get_to(p.myScore);
+    if (j.contains("seconds")) j.at("seconds").get_to(p.seconds);
+    if (j.contains("coordinates")) j.at("coordinates").get_to(p.coordinates);
 }

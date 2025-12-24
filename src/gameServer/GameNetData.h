@@ -26,17 +26,6 @@ public:
     std::map<int, string> getNumToId() const;
     void setNumToId(const std::map<int, string>& NumToId);
 
-    std::vector<std::vector<int>> getPlayer1Board() const;
-    void setPlayer1Board(const std::vector<std::vector<int>>& player1Board);
-
-    std::vector<std::vector<int>> getPlayer2Board() const;
-    void setPlayer2Board(const std::vector<std::vector<int>>& player2Board);
-
-    std::vector<std::vector<int>> getPlayer3Board() const;
-    void setPlayer3Board(const std::vector<std::vector<int>>& player3Board);
-
-    std::vector<std::vector<int>> getPlayer4Board() const;
-    void setPlayer4Board(const std::vector<std::vector<int>>& player4Board);
 
     std::vector<std::vector<int>> getMyBoard() const;
     void setMyBoard(const std::vector<std::vector<int>>& myBoard);
@@ -56,22 +45,26 @@ public:
     int getMyScore() const;
     void setMyScore(int myScore);
 
+    int getSeconds() const;
+    void setSeconds(int seconds);
+
+    std::vector<std::pair<int,int>> getCoordinates() const;
+    void setCoordinates(const std::vector<std::pair<int,int>>& coordinates);
 private:
     int type;
     string ID;
     string data;
     std::map<string,int> IdToNum;
     std::map<int,string> NumToId;
-    std::vector<std::vector<int>> player1Board;
-    std::vector<std::vector<int>> player2Board;
-    std::vector<std::vector<int>> player3Board;
-    std::vector<std::vector<int>> player4Board;
+
     std::vector<std::vector<int>> myBoard;
     int player1Score;
     int player2Score;
     int player3Score;
     int player4Score;
     int myScore;
+    int seconds;
+    std::vector<std::pair<int,int>> coordinates;
     friend void to_json(nlohmann::json& j, const GameNetData& p);
     friend void from_json(const nlohmann::json& j, GameNetData& p);
 };

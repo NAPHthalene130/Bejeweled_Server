@@ -144,7 +144,40 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         }
 
         if (parseSuccess) {
-            // TODO: Process received GameNetData
+            int type = receivedData.getType();
+            if (type == 0) {
+                if (gameStarted) {
+                    GameNetData reply;
+                    reply.setType(0);
+                    reply.setData("GAME_STARTED");
+                    sendData(socket, reply);
+                } else {
+                    // Add ID to socket map
+                    idToNetIOStream[receivedData.getID()] = socket;
+                    
+                    int roomHave = testConnect();
+                    
+                    // Broadcast room count
+                    GameNetData broadcastData;
+                    broadcastData.setType(11);
+                    broadcastData.setData(std::to_string(roomHave));
+                    globalSend(broadcastData);
+                    
+                    // Send ENTER_ROOM to current socket
+                    GameNetData privateData;
+                    privateData.setType(0);
+                    privateData.setData("ENTER_ROOM");
+                    sendData(socket, privateData);
+                }
+            } else if (type == 1) {
+                // TODO
+            } else if (type == 2) {
+                // TODO
+            } else if (type == 3) {
+                // TODO
+            } else if (type == 4) {
+                // TODO
+            }
         } else {
             // std::cerr << "Failed to parse GameNetData" << std::endl;
         }

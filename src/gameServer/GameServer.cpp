@@ -234,3 +234,57 @@ void GameServer::setPlayer3Score(int score) { player3Score = score; }
 
 int GameServer::getPlayer4Score() const { return player4Score; }
 void GameServer::setPlayer4Score(int score) { player4Score = score; }
+
+void GameServer::globalSend(GameNetData data) {
+    for (auto const& [id, socket] : idToNetIOStream) {
+        if (socket) {
+            try {
+                sendData(socket, data);
+            } catch (...) {
+                // Ignore errors during broadcast
+            }
+        }
+    }
+}
+
+void GameServer::sendData(std::shared_ptr<tcp::socket> socket, GameNetData data) {
+    if (!socket || !socket->is_open()) return;
+
+    // Convert data to json string
+    json j = data;
+    std::string s = j.dump();
+    
+    // Send data
+    boost::asio::write(*socket, boost::asio::buffer(s));
+    
+    // Close the socket as requested
+    boost::system::error_code ec;
+    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    socket->close(ec);
+}
+
+int GameServer::testConnect() {
+    GameNetData data;
+    data.setType(13);
+    
+    std::vector<std::string> idsToRemove;
+    
+    for (auto const& [id, socket] : idToNetIOStream) {
+        try {
+            sendData(socket, data);
+        } catch (...) {
+            idsToRemove.push_back(id);
+        }
+    }
+    
+    for (const auto& id : idsToRemove) {
+        if (IdToNum.count(id)) {
+            int num = IdToNum[id];
+            numToId.erase(num);
+            IdToNum.erase(id);
+        }
+        idToNetIOStream.erase(id);
+    }
+    
+    return idToNetIOStream.size();
+}

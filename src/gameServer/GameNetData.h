@@ -65,6 +65,7 @@ private:
     int myScore;
     int seconds;
     std::vector<std::pair<int,int>> coordinates;
+    bool gameStarted = false;
     friend void to_json(nlohmann::json& j, const GameNetData& p);
     friend void from_json(const nlohmann::json& j, GameNetData& p);
 };

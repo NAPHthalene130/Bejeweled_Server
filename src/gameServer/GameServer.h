@@ -26,6 +26,12 @@ public:
     void resetGame();
     
     void globalSend(GameNetData data);
+    void startReceive(std::shared_ptr<tcp::socket> socket, std::string accumulatedBuffer = "");
+    void handleReceive(std::shared_ptr<tcp::socket> socket,
+                                  std::shared_ptr<std::vector<char>> buffer,
+                                  const boost::system::error_code& error,
+                                  std::size_t bytesTransferred,
+                                  std::string accumulatedBuffer);
     void sendData(std::shared_ptr<tcp::socket> socket, GameNetData data);
     void sendData(const std::string& id, GameNetData data);
     int testConnect();
@@ -71,39 +77,35 @@ public:
     void setPlayer4Score(int score);
 
 private:
-    void startAccept();
-    void handleAccept(std::shared_ptr<tcp::socket> socket,
-                       const boost::system::error_code& error);
-    void startReceive(std::shared_ptr<tcp::socket> socket);
-    void handleReceive(std::shared_ptr<tcp::socket> socket,
-                        std::shared_ptr<std::vector<char>> buffer,
-                        const boost::system::error_code& error,
-                        std::size_t bytesTransferred);
-    
-    // Timer handler
-    void handleTimer(const boost::system::error_code& error);
-
+    std::mutex gameMutex;
     boost::asio::io_context ioContext;
-    tcp::acceptor acceptor;
+    boost::asio::ip::tcp::acceptor acceptor;
     std::vector<std::thread> workerThreads;
     std::atomic<bool> stopped{false};
-    
     boost::asio::steady_timer gameTimer;
-
-    // Game State
-    bool gameStarted;
-    int roomPeopleHave;
+    
+    // Game state
+    bool gameStarted = false;
+    int roomPeopleHave = 0;
     std::map<std::string, int> IdToNum;
     std::map<int, std::string> numToId;
     std::map<std::string, std::shared_ptr<tcp::socket>> idToNetIOStream;
+    
     std::vector<std::vector<int>> player1Board;
     std::vector<std::vector<int>> player2Board;
     std::vector<std::vector<int>> player3Board;
     std::vector<std::vector<int>> player4Board;
-    int player1Score;
-    int player2Score;
-    int player3Score;
-    int player4Score;
-};
+    
+    int player1Score = 0;
+    int player2Score = 0;
+    int player3Score = 0;
+    int player4Score = 0;
+
+    void handleAccept(std::shared_ptr<tcp::socket> socket,
+                       const boost::system::error_code& error);
+     void startAccept();
+     int testConnectLocked();
+     void handleTimer(const boost::system::error_code& error);
+ };
 
 #endif // GAMESERVER_H

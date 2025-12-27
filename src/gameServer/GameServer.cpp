@@ -86,7 +86,7 @@ void GameServer::handleAccept(std::shared_ptr<tcp::socket> socket,
                       << socket->remote_endpoint().address().to_string()
                       << ":" << socket->remote_endpoint().port() << std::endl;
             
-            startReceive(socket);
+            startReceive(socket, "");
         } catch (const boost::system::system_error& e) {
             std::cerr << "Error setting socket options: " << e.what() << std::endl;
         }
@@ -100,91 +100,155 @@ void GameServer::handleAccept(std::shared_ptr<tcp::socket> socket,
     }
 }
 
-void GameServer::startReceive(std::shared_ptr<tcp::socket> socket) {
+void GameServer::startReceive(std::shared_ptr<tcp::socket> socket, std::string accumulatedBuffer) {
     if (stopped) return;
     
     // Use shared_ptr for buffer
     auto buffer = std::make_shared<std::vector<char>>(4096); 
     
     socket->async_read_some(boost::asio::buffer(*buffer),
-        [this, socket, buffer](const boost::system::error_code& error,
+        [this, socket, buffer, accumulatedBuffer](const boost::system::error_code& error,
                                std::size_t bytesTransferred) {
-            handleReceive(socket, buffer, error, bytesTransferred);
+            handleReceive(socket, buffer, error, bytesTransferred, accumulatedBuffer);
         });
 }
 
 void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                   std::shared_ptr<std::vector<char>> buffer,
                                   const boost::system::error_code& error,
-                                  std::size_t bytesTransferred) {
+                                  std::size_t bytesTransferred,
+                                  std::string accumulatedBuffer) {
     if (stopped) return;
     
     if (!error) {
-        std::string receivedStr(buffer->data(), bytesTransferred);
-        std::cout << "[GameServer][Info]: Received " << bytesTransferred << " bytes: " << receivedStr << std::endl;
+        // Append new data to accumulated buffer
+        accumulatedBuffer.append(buffer->data(), bytesTransferred);
         
-        GameNetData receivedData;
-        bool parseSuccess = false;
-
-        // Attempt to parse JSON
-        try {
-            auto j = json::parse(receivedStr);
-            receivedData = j.get<GameNetData>();
-            parseSuccess = true;
-        } catch (...) {
-            // Parsing failed, might need base64 decode or other handling if required
-            // For now, we assume simple JSON or try base64 if simple fails as per AuthServer pattern
-             try {
-                // Simple Base64 decode attempt (simplified version of AuthServer's logic without OpenSSL dependency if possible, 
-                // but since we are in the same project, we could reuse or just stick to basic JSON for GameServer)
-                // For this task, I'll stick to basic JSON parsing success/fail. 
-                // If the user needs the full AuthServer decryption logic, I'd need to include OpenSSL headers and copy those methods.
-                // Given the prompt "similar to receiving GameNetData info method", I'll assume standard JSON.
-            } catch (...) {}
-        }
-
-        if (parseSuccess) {
-            int type = receivedData.getType();
-            if (type == 0) {
-                if (gameStarted) {
-                    GameNetData reply;
-                    reply.setType(0);
-                    reply.setData("GAME_STARTED");
-                    sendData(socket, reply);
-                } else {
-                    // Add ID to socket map
-                    idToNetIOStream[receivedData.getID()] = socket;
-                    
-                    // Send ENTER_ROOM to current socket
-                    GameNetData privateData;
-                    privateData.setType(0);
-                    privateData.setData("ENTER_ROOM");
-                    sendData(socket, privateData);
-                    
-                    int roomHave = testConnect();
-                    
-                    // Broadcast room count
-                    GameNetData broadcastData;
-                    broadcastData.setType(11);
-                    broadcastData.setData(std::to_string(roomHave));
-                    globalSend(broadcastData);
-                    
-                }
-            } else if (type == 1) {
-                // TODO
-            } else if (type == 2) {
-                // TODO
-            } else if (type == 3) {
-                // TODO
-            } else if (type == 4) {
-                // TODO
+        // Process accumulated buffer for complete JSON objects
+        while (!accumulatedBuffer.empty()) {
+            // Skip whitespace/garbage at start
+            size_t startPos = accumulatedBuffer.find('{');
+            if (startPos == std::string::npos) {
+                // No JSON start found, clear buffer if too large to avoid memory growth
+                if (accumulatedBuffer.length() > 4096) accumulatedBuffer.clear(); 
+                break; 
             }
-        } else {
-            // std::cerr << "Failed to parse GameNetData" << std::endl;
+            
+            if (startPos > 0) {
+                accumulatedBuffer.erase(0, startPos);
+                startPos = 0;
+            }
+
+            // Try to find the matching closing brace
+            int braceCount = 0;
+            bool inString = false;
+            bool escaped = false;
+            size_t endPos = std::string::npos;
+            
+            for (size_t i = 0; i < accumulatedBuffer.length(); ++i) {
+                char c = accumulatedBuffer[i];
+                if (escaped) {
+                    escaped = false;
+                    continue;
+                }
+                if (c == '\\') {
+                    escaped = true;
+                    continue;
+                }
+                if (c == '"') {
+                    inString = !inString;
+                    continue;
+                }
+                
+                if (!inString) {
+                    if (c == '{') {
+                        braceCount++;
+                    } else if (c == '}') {
+                        braceCount--;
+                        if (braceCount == 0) {
+                            endPos = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (endPos != std::string::npos) {
+                // Found a complete JSON object
+                std::string jsonStr = accumulatedBuffer.substr(0, endPos + 1);
+                accumulatedBuffer.erase(0, endPos + 1);
+                
+                std::cout << "[GameServer][Info]: Processing JSON: " << jsonStr << std::endl;
+                
+                bool parseSuccess = false;
+                GameNetData receivedData;
+
+                try {
+                    auto j = json::parse(jsonStr);
+                    receivedData = j.get<GameNetData>();
+                    parseSuccess = true;
+                } catch (const std::exception& e) {
+                    std::cerr << "[GameServer][Error]: JSON parse error: " << e.what() << std::endl;
+                }
+
+                if (parseSuccess) {
+                    int type = receivedData.getType();
+                    if (type == 0) {
+                        std::lock_guard<std::mutex> lock(gameMutex); // Protect shared state
+                        
+                        if (gameStarted) {
+                            GameNetData reply;
+                            reply.setType(0);
+                            reply.setData("GAME_STARTED");
+                            sendData(socket, reply);
+                        } else {
+                            // Add ID to socket map
+                            std::string id = receivedData.getID();
+                            idToNetIOStream[id] = socket;
+                            
+                            // Send ENTER_ROOM to current socket
+                            GameNetData privateData;
+                            privateData.setType(0);
+                            privateData.setData("ENTER_ROOM");
+                            sendData(socket, privateData);
+                            
+                            int roomHave = testConnectLocked();
+                            
+                            // Broadcast room count
+                            GameNetData broadcastData;
+                            broadcastData.setType(11);
+                            broadcastData.setData(std::to_string(roomHave));
+                            
+                            // Inline globalSend logic (since we hold lock)
+                            for (auto const& [id, s] : idToNetIOStream) {
+                                if (s) {
+                                    try {
+                                        sendData(s, broadcastData);
+                                    } catch (...) {
+                                        // Ignore errors during broadcast
+                                    }
+                                }
+                            }
+                        }
+                    } else if (type == 1) {
+                        // TODO
+                    } else if (type == 2) {
+                        // TODO
+                    } else if (type == 3) {
+                        // TODO
+                    } else if (type == 4) {
+                        // TODO
+                    }
+                }
+            } else {
+                // Incomplete JSON, wait for more data
+                break;
+            }
         }
         
-        // Continue receive
-        startReceive(socket);
+        // Continue receive with remaining buffer
+        startReceive(socket, accumulatedBuffer);
+        
     } else if (error != boost::asio::error::eof) {
         if (error != boost::asio::error::operation_aborted) {
             std::cerr << "[GameServer][Error]: Receive error: " << error.message() << std::endl;
@@ -213,6 +277,7 @@ void GameServer::timeUp() {
 }
 
 void GameServer::resetGame() {
+    std::lock_guard<std::mutex> lock(gameMutex);
     gameStarted = false;
     roomPeopleHave = 0;
     IdToNum.clear();
@@ -228,48 +293,90 @@ void GameServer::resetGame() {
     player4Score = 0;
 }
 
-// Getters and Setters
+// Getters and Setters - Adding locks where appropriate
 
-bool GameServer::getGameStarted() const { return gameStarted; }
-void GameServer::setGameStarted(bool started) { gameStarted = started; }
+bool GameServer::getGameStarted() const { 
+    return gameStarted; 
+}
+void GameServer::setGameStarted(bool started) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    gameStarted = started; 
+}
 
 int GameServer::getRoomPeopleHave() const { return roomPeopleHave; }
-void GameServer::setRoomPeopleHave(int count) { roomPeopleHave = count; }
+void GameServer::setRoomPeopleHave(int count) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    roomPeopleHave = count; 
+}
 
 std::map<std::string, int> GameServer::getIdToNum() const { return IdToNum; }
-void GameServer::setIdToNum(const std::map<std::string, int>& map) { IdToNum = map; }
+void GameServer::setIdToNum(const std::map<std::string, int>& map) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    IdToNum = map; 
+}
 
 std::map<int, std::string> GameServer::getNumToId() const { return numToId; }
-void GameServer::setNumToId(const std::map<int, std::string>& map) { numToId = map; }
+void GameServer::setNumToId(const std::map<int, std::string>& map) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    numToId = map; 
+}
 
 std::map<std::string, std::shared_ptr<boost::asio::ip::tcp::socket>> GameServer::getIdToNetIOStream() const { return idToNetIOStream; }
-void GameServer::setIdToNetIOStream(const std::map<std::string, std::shared_ptr<boost::asio::ip::tcp::socket>>& map) { idToNetIOStream = map; }
+void GameServer::setIdToNetIOStream(const std::map<std::string, std::shared_ptr<boost::asio::ip::tcp::socket>>& map) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    idToNetIOStream = map; 
+}
 
 std::vector<std::vector<int>> GameServer::getPlayer1Board() const { return player1Board; }
-void GameServer::setPlayer1Board(const std::vector<std::vector<int>>& board) { player1Board = board; }
+void GameServer::setPlayer1Board(const std::vector<std::vector<int>>& board) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player1Board = board; 
+}
 
 std::vector<std::vector<int>> GameServer::getPlayer2Board() const { return player2Board; }
-void GameServer::setPlayer2Board(const std::vector<std::vector<int>>& board) { player2Board = board; }
+void GameServer::setPlayer2Board(const std::vector<std::vector<int>>& board) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player2Board = board; 
+}
 
 std::vector<std::vector<int>> GameServer::getPlayer3Board() const { return player3Board; }
-void GameServer::setPlayer3Board(const std::vector<std::vector<int>>& board) { player3Board = board; }
+void GameServer::setPlayer3Board(const std::vector<std::vector<int>>& board) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player3Board = board; 
+}
 
 std::vector<std::vector<int>> GameServer::getPlayer4Board() const { return player4Board; }
-void GameServer::setPlayer4Board(const std::vector<std::vector<int>>& board) { player4Board = board; }
+void GameServer::setPlayer4Board(const std::vector<std::vector<int>>& board) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player4Board = board; 
+}
 
 int GameServer::getPlayer1Score() const { return player1Score; }
-void GameServer::setPlayer1Score(int score) { player1Score = score; }
+void GameServer::setPlayer1Score(int score) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player1Score = score; 
+}
 
 int GameServer::getPlayer2Score() const { return player2Score; }
-void GameServer::setPlayer2Score(int score) { player2Score = score; }
+void GameServer::setPlayer2Score(int score) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player2Score = score; 
+}
 
 int GameServer::getPlayer3Score() const { return player3Score; }
-void GameServer::setPlayer3Score(int score) { player3Score = score; }
+void GameServer::setPlayer3Score(int score) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player3Score = score; 
+}
 
 int GameServer::getPlayer4Score() const { return player4Score; }
-void GameServer::setPlayer4Score(int score) { player4Score = score; }
+void GameServer::setPlayer4Score(int score) { 
+    std::lock_guard<std::mutex> lock(gameMutex);
+    player4Score = score; 
+}
 
 void GameServer::globalSend(GameNetData data) {
+    std::lock_guard<std::mutex> lock(gameMutex);
     for (auto const& [id, socket] : idToNetIOStream) {
         if (socket) {
             try {
@@ -288,6 +395,8 @@ void GameServer::sendData(std::shared_ptr<tcp::socket> socket, GameNetData data)
     json j = data;
     std::string s = j.dump();
     
+    std::cout << "[GameServer][Info]: Sending data: " << s << std::endl;
+
     // Send data
     boost::asio::write(*socket, boost::asio::buffer(s));
     
@@ -295,6 +404,7 @@ void GameServer::sendData(std::shared_ptr<tcp::socket> socket, GameNetData data)
 }
 
 void GameServer::sendData(const std::string& id, GameNetData data) {
+    std::lock_guard<std::mutex> lock(gameMutex);
     if (idToNetIOStream.count(id)) {
         auto socket = idToNetIOStream[id];
         sendData(socket, data);
@@ -302,6 +412,11 @@ void GameServer::sendData(const std::string& id, GameNetData data) {
 }
 
 int GameServer::testConnect() {
+    std::lock_guard<std::mutex> lock(gameMutex);
+    return testConnectLocked();
+}
+
+int GameServer::testConnectLocked() {
     GameNetData data;
     data.setType(13);
     
@@ -316,12 +431,22 @@ int GameServer::testConnect() {
     }
     
     for (const auto& id : idsToRemove) {
+        std::cout << "[GameServer][Info]: Removing disconnected client ID: " << id << std::endl;
         if (IdToNum.count(id)) {
             int num = IdToNum[id];
             numToId.erase(num);
             IdToNum.erase(id);
         }
         idToNetIOStream.erase(id);
+    }
+    
+    std::cout << "[GameServer][Info]: Active connections count: " << idToNetIOStream.size() << std::endl;
+    if (!idToNetIOStream.empty()) {
+        std::cout << "[GameServer][Info]: Connected Client IDs: ";
+        for (auto const& [id, _] : idToNetIOStream) {
+            std::cout << id << " ";
+        }
+        std::cout << std::endl;
     }
     
     return idToNetIOStream.size();

@@ -195,37 +195,69 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     int type = receivedData.getType();
                     if (type == 0) {
                         std::lock_guard<std::mutex> lock(gameMutex); // Protect shared state
-                        
+                        std::string dataStr = receivedData.getData();
+                        std::string id = receivedData.getID();
+
                         if (gameStarted) {
                             GameNetData reply;
                             reply.setType(0);
                             reply.setData("GAME_STARTED");
                             sendData(socket, reply);
                         } else {
-                            // Add ID to socket map
-                            std::string id = receivedData.getID();
-                            idToNetIOStream[id] = socket;
-                            
-                            // Send ENTER_ROOM to current socket
-                            GameNetData privateData;
-                            privateData.setType(0);
-                            privateData.setData("ENTER_ROOM");
-                            sendData(socket, privateData);
-                            
-                            int roomHave = testConnectLocked();
-                            
-                            // Broadcast room count
-                            GameNetData broadcastData;
-                            broadcastData.setType(11);
-                            broadcastData.setData(std::to_string(roomHave));
-                            
-                            // Inline globalSend logic (since we hold lock)
-                            for (auto const& [id, s] : idToNetIOStream) {
-                                if (s) {
-                                    try {
-                                        sendData(s, broadcastData);
-                                    } catch (...) {
-                                        // Ignore errors during broadcast
+                            if (dataStr == "EXIT") {
+                                std::cout << "[GameServer][Info]: Client requested EXIT: " << id << std::endl;
+                                
+                                // Remove from maps
+                                if (IdToNum.count(id)) {
+                                    int num = IdToNum[id];
+                                    numToId.erase(num);
+                                    IdToNum.erase(id);
+                                }
+                                idToNetIOStream.erase(id);
+                                
+                                // Test connect and get room count
+                                int roomHave = testConnectLocked();
+                                
+                                // Broadcast room count
+                                GameNetData broadcastData;
+                                broadcastData.setType(11);
+                                broadcastData.setData(std::to_string(roomHave));
+                                
+                                // Inline globalSend logic (since we hold lock)
+                                for (auto const& [currId, s] : idToNetIOStream) {
+                                    if (s) {
+                                        try {
+                                            sendData(s, broadcastData);
+                                        } catch (...) {
+                                            // Ignore errors during broadcast
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Add ID to socket map
+                                idToNetIOStream[id] = socket;
+                                
+                                // Send ENTER_ROOM to current socket
+                                GameNetData privateData;
+                                privateData.setType(0);
+                                privateData.setData("ENTER_ROOM");
+                                sendData(socket, privateData);
+                                
+                                int roomHave = testConnectLocked();
+                                
+                                // Broadcast room count
+                                GameNetData broadcastData;
+                                broadcastData.setType(11);
+                                broadcastData.setData(std::to_string(roomHave));
+                                
+                                // Inline globalSend logic (since we hold lock)
+                                for (auto const& [currId, s] : idToNetIOStream) {
+                                    if (s) {
+                                        try {
+                                            sendData(s, broadcastData);
+                                        } catch (...) {
+                                            // Ignore errors during broadcast
+                                        }
                                     }
                                 }
                             }

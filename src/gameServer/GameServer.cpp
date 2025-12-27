@@ -11,7 +11,7 @@ GameServer::GameServer(unsigned short port)
     // Set socket reuse address option
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     startAccept();
-    std::cout << "GameServer listening on port " << port << std::endl;
+    std::cout << "[GameServer][Info]: Listening on port " << port << std::endl;
     
     resetGame();
 }
@@ -25,7 +25,7 @@ void GameServer::run() {
     std::size_t threadPoolSize = std::thread::hardware_concurrency();
     if (threadPoolSize == 0) threadPoolSize = 2;
     
-    std::cout << "Starting GameServer with " << threadPoolSize << " worker threads" << std::endl;
+    std::cout << "[GameServer][Info]: Starting GameServer with " << threadPoolSize << " worker threads" << std::endl;
     
     workerThreads.reserve(threadPoolSize);
     for (std::size_t i = 0; i < threadPoolSize; ++i) {
@@ -33,7 +33,7 @@ void GameServer::run() {
             try {
                 ioContext.run();
             } catch (const std::exception& e) {
-                std::cerr << "Exception in worker thread " << i << ": " << e.what() << std::endl;
+                std::cerr << "[GameServer][Error]: Exception in worker thread " << i << ": " << e.what() << std::endl;
             }
         });
     }
@@ -43,12 +43,12 @@ void GameServer::run() {
         if (t.joinable()) t.join();
     }
     
-    std::cout << "All worker threads have finished" << std::endl;
+    std::cout << "[GameServer][Info]: All worker threads have finished" << std::endl;
 }
 
 void GameServer::stop() {
     if (!stopped.exchange(true)) {
-        std::cout << "Stopping GameServer..." << std::endl;
+        std::cout << "[GameServer][Info]: Stopping GameServer..." << std::endl;
         
         gameTimer.cancel();
 
@@ -56,7 +56,7 @@ void GameServer::stop() {
         boost::system::error_code ec;
         acceptor.close(ec);
         if (ec) {
-            std::cerr << "Error closing acceptor: " << ec.message() << std::endl;
+            std::cerr << "[GameServer][Error]: Error closing acceptor: " << ec.message() << std::endl;
         }
         
         // Stop ioContext
@@ -121,7 +121,7 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
     
     if (!error) {
         std::string receivedStr(buffer->data(), bytesTransferred);
-        // std::cout << "Received " << bytesTransferred << " bytes" << std::endl;
+        std::cout << "[GameServer][Info]: Received " << bytesTransferred << " bytes: " << receivedStr << std::endl;
         
         GameNetData receivedData;
         bool parseSuccess = false;
@@ -155,6 +155,12 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     // Add ID to socket map
                     idToNetIOStream[receivedData.getID()] = socket;
                     
+                    // Send ENTER_ROOM to current socket
+                    GameNetData privateData;
+                    privateData.setType(0);
+                    privateData.setData("ENTER_ROOM");
+                    sendData(socket, privateData);
+                    
                     int roomHave = testConnect();
                     
                     // Broadcast room count
@@ -163,11 +169,6 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     broadcastData.setData(std::to_string(roomHave));
                     globalSend(broadcastData);
                     
-                    // Send ENTER_ROOM to current socket
-                    GameNetData privateData;
-                    privateData.setType(0);
-                    privateData.setData("ENTER_ROOM");
-                    sendData(socket, privateData);
                 }
             } else if (type == 1) {
                 // TODO
@@ -186,11 +187,11 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         startReceive(socket);
     } else if (error != boost::asio::error::eof) {
         if (error != boost::asio::error::operation_aborted) {
-            std::cerr << "Receive error: " << error.message() << std::endl;
+            std::cerr << "[GameServer][Error]: Receive error: " << error.message() << std::endl;
         }
     } else {
         // Connection closed
-        // std::cout << "Connection closed by peer" << std::endl;
+        std::cout << "[GameServer][Info]: Connection closed by peer" << std::endl;
     }
 }
 
@@ -290,10 +291,14 @@ void GameServer::sendData(std::shared_ptr<tcp::socket> socket, GameNetData data)
     // Send data
     boost::asio::write(*socket, boost::asio::buffer(s));
     
-    // Close the socket as requested
-    boost::system::error_code ec;
-    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-    socket->close(ec);
+    // Do not close the socket here. Let the connection persist or be closed by the client/error handler.
+}
+
+void GameServer::sendData(const std::string& id, GameNetData data) {
+    if (idToNetIOStream.count(id)) {
+        auto socket = idToNetIOStream[id];
+        sendData(socket, data);
+    }
 }
 
 int GameServer::testConnect() {

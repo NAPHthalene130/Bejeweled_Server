@@ -17,7 +17,7 @@ AuthServer::AuthServer(unsigned short port)
     // Set socket reuse address option
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     startAccept();
-    std::cout << "AuthServer listening on port " << port << std::endl;
+    std::cout << "[AuthServer][Info]: Listening on port " << port << std::endl;
 }
 
 AuthServer::~AuthServer() {
@@ -29,18 +29,18 @@ void AuthServer::run() {
     std::size_t threadPoolSize = std::thread::hardware_concurrency();
     if (threadPoolSize == 0) threadPoolSize = 2;
     
-    std::cout << "Starting server with " << threadPoolSize << " worker threads" << std::endl;
+    std::cout << "[AuthServer][Info]: Starting server with " << threadPoolSize << " worker threads" << std::endl;
     
     workerThreads.reserve(threadPoolSize);
     for (std::size_t i = 0; i < threadPoolSize; ++i) {
         workerThreads.emplace_back([this, i]() {
             try {
-                std::cout << "Worker thread " << i << " started" << std::endl;
+                std::cout << "[AuthServer][Info]: Worker thread " << i << " started" << std::endl;
                 // Run ioContext
                 ioContext.run();
-                std::cout << "Worker thread " << i << " exited" << std::endl;
+                std::cout << "[AuthServer][Info]: Worker thread " << i << " exited" << std::endl;
             } catch (const std::exception& e) {
-                std::cerr << "Exception in worker thread " << i << ": " << e.what() << std::endl;
+                std::cerr << "[AuthServer][Error]: Exception in worker thread " << i << ": " << e.what() << std::endl;
             }
         });
     }
@@ -50,7 +50,7 @@ void AuthServer::run() {
         if (t.joinable()) t.join();
     }
     
-    std::cout << "All worker threads have finished" << std::endl;
+    std::cout << "[AuthServer][Info]: All worker threads have finished" << std::endl;
 }
 
 void AuthServer::stop() {
@@ -87,20 +87,20 @@ void AuthServer::handleAccept(std::shared_ptr<tcp::socket> socket,
             // Set socket options
             socket->set_option(boost::asio::ip::tcp::no_delay(true)); 
             
-            std::cout << "New connection from: "
+            std::cout << "[AuthServer][Info]: New connection from: "
                       << socket->remote_endpoint().address().to_string()
                       << ":" << socket->remote_endpoint().port() << std::endl;
             
             startReceive(socket);
         } catch (const boost::system::system_error& e) {
-            std::cerr << "Error setting socket options: " << e.what() << std::endl;
+            std::cerr << "[AuthServer][Error]: Error setting socket options: " << e.what() << std::endl;
         }
         
         // Continue accepting
         startAccept();
     } else if (error) {
         if (error != boost::asio::error::operation_aborted) {
-            std::cerr << "Accept error: " << error.message() << std::endl;
+            std::cerr << "[AuthServer][Error]: Accept error: " << error.message() << std::endl;
         }
     }
 }
@@ -127,7 +127,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
     if (!error) {
         // Handle received data
         std::string receivedStr(buffer->data(), bytesTransferred);
-        std::cout << "Received " << bytesTransferred << " bytes: " 
+        std::cout << "[AuthServer][Info]: Received " << bytesTransferred << " bytes: " 
                   << receivedStr << std::endl;
         
         AuthNetData receivedData;
@@ -149,7 +149,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                 auto j = nlohmann::json::parse(decoded);
                 receivedData = j.get<AuthNetData>();
                 parseSuccess = true;
-                std::cout << "Base64 decoded data successfully (No RSA)." << std::endl;
+                std::cout << "[AuthServer][Info]: Base64 decoded data successfully (No RSA)." << std::endl;
             } catch (...) {
                 // Ignore
             }
@@ -162,9 +162,9 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                 auto j = nlohmann::json::parse(decrypted);
                 receivedData = j.get<AuthNetData>();
                 parseSuccess = true;
-                std::cout << "Decrypted data successfully." << std::endl;
+                std::cout << "[AuthServer][Info]: Decrypted data successfully." << std::endl;
             } catch (const std::exception& e) {
-                std::cerr << "Decryption/Parsing failed: " << e.what() << std::endl;
+                std::cerr << "[AuthServer][Error]: Decryption/Parsing failed: " << e.what() << std::endl;
             }
         }
 
@@ -178,7 +178,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     // 0: Request Public Key
                     responseData.setType(0);
                     responseData.setData(publicKey);
-                    std::cout << "Sent Public Key." << std::endl;
+                    std::cout << "[AuthServer][Info]: Sent Public Key." << std::endl;
                 } else if (receivedData.getType() == 1) { // Login
                     responseData.setType(1);
                     int authResult = SqlUtil::authPasswordFromPlayerinfo(receivedData.getId(), receivedData.getPassword());
@@ -212,11 +212,11 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     }
                 }
             } catch (std::exception const& e) {
-                std::cerr << "Exception in processing logic: " << e.what() << std::endl;
+                std::cerr << "pg logic: " << e.what() << std::endl;
                 responseData.setType(-1);
             }
         } else {
-            std::cerr << "Failed to process received data." << std::endl;
+            std::cerr << "eived data." << std::endl;
         }
 
         response = nlohmann::json(responseData).dump();
@@ -227,7 +227,7 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                           std::size_t /*bytesWritten*/) {
                                      if (writeError) {
                                          if (writeError != boost::asio::error::operation_aborted) {
-                                             std::cerr << "Write error: " << writeError.message() << std::endl;
+                                             std::cerr << "[AuthServer][Error]: Write error: " << writeError.message() << std::endl;
                                          }
                                      }
                                  });
@@ -236,11 +236,11 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         startReceive(socket);
     } else if (error != boost::asio::error::eof) {
         if (error != boost::asio::error::operation_aborted) {
-            std::cerr << "Receive error: " << error.message() << std::endl;
+            std::cerr << "[AuthServer][Error]: Receive error: " << error.message() << std::endl;
         }
     } else {
         // Connection closed
-        std::cout << "Connection closed by peer" << std::endl;
+        std::cout << "[AuthServer][Info]: Connection closed by peer" << std::endl;
     }
 }
 
@@ -252,25 +252,25 @@ bool AuthServer::emailCodeSend(std::string email) {
 void AuthServer::generateKeys() {
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
     if (!ctx) {
-        std::cerr << "EVP_PKEY_CTX_new_id failed" << std::endl;
+        std::cerr << "[AuthServer][Error]: EVP_PKEY_CTX_new_id failed" << std::endl;
         return;
     }
     
     if (EVP_PKEY_keygen_init(ctx) <= 0) {
-        std::cerr << "EVP_PKEY_keygen_init failed" << std::endl;
+        std::cerr << "[AuthServer][Error]: EVP_PKEY_keygen_init failed" << std::endl;
         EVP_PKEY_CTX_free(ctx);
         return;
     }
     
     if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, 2048) <= 0) {
-        std::cerr << "EVP_PKEY_CTX_set_rsa_keygen_bits failed" << std::endl;
+        std::cerr << "[AuthServer][Error]: EVP_PKEY_CTX_set_rsa_keygen_bits failed" << std::endl;
         EVP_PKEY_CTX_free(ctx);
         return;
     }
     
     EVP_PKEY *pkey = NULL;
     if (EVP_PKEY_keygen(ctx, &pkey) <= 0) {
-        std::cerr << "EVP_PKEY_keygen failed" << std::endl;
+        std::cerr << "[AuthServer][Error]: EVP_PKEY_keygen failed" << std::endl;
         EVP_PKEY_CTX_free(ctx);
         return;
     }
@@ -279,7 +279,7 @@ void AuthServer::generateKeys() {
     // Save Public Key
     BIO *bp_public = BIO_new(BIO_s_mem());
     if (PEM_write_bio_PUBKEY(bp_public, pkey) != 1) {
-         std::cerr << "PEM_write_bio_PUBKEY failed" << std::endl;
+         std::cerr << "[AuthServer][Error]: PEM_write_bio_PUBKEY failed" << std::endl;
     }
     
     char *data = NULL;
@@ -292,7 +292,7 @@ void AuthServer::generateKeys() {
     // Save Private Key
     BIO *bp_private = BIO_new(BIO_s_mem());
     if (PEM_write_bio_PrivateKey(bp_private, pkey, NULL, NULL, 0, NULL, NULL) != 1) {
-        std::cerr << "PEM_write_bio_PrivateKey failed" << std::endl;
+        std::cerr << "[AuthServer][Error]: PEM_write_bio_PrivateKey failed" << std::endl;
     }
     len = BIO_get_mem_data(bp_private, &data);
     if (len > 0) {
@@ -301,7 +301,7 @@ void AuthServer::generateKeys() {
     BIO_free(bp_private);
     
     EVP_PKEY_free(pkey);
-    std::cout << "RSA Keys generated successfully." << std::endl;
+    std::cout << "[AuthServer][Info]: RSA Keys generated successfully." << std::endl;
 }
 
 std::string AuthServer::rsaDecryptBase64(const std::string& cipherTextBase64) {

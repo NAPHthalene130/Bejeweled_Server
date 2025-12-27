@@ -27,6 +27,7 @@ public:
     
     void globalSend(GameNetData data);
     void sendData(std::shared_ptr<tcp::socket> socket, GameNetData data);
+    void sendData(const std::string& id, GameNetData data);
     int testConnect();
 
     // Getters and Setters

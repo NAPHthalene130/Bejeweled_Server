@@ -292,7 +292,28 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     } else if (type == 1) {
                         // TODO
                     } else if (type == 2) {
-                        // TODO
+                        std::string id = receivedData.getID();
+                        if (IdToNum.find(id) != IdToNum.end()) {
+                            int num = IdToNum[id];
+                            if (num == 0) {
+                                player1Score = stoi(receivedData.getData());
+                            } else if (num == 1) {
+                                player2Score = stoi(receivedData.getData());
+                            } else if (num == 2) {
+                                player3Score = stoi(receivedData.getData());
+                            } else if (num == 3) {
+                                player4Score = stoi(receivedData.getData());
+                            }
+                        }
+                        for (auto const& [currId, s] : idToNetIOStream) {
+                            if (s) {
+                                try {
+                                    sendData(s, receivedData);
+                                } catch (...) {
+                                    // Ignore errors during broadcast
+                                }
+                            }
+                        }
                     } else if (type == 3) {
                         // TODO
                     } else if (type == 4) {

@@ -214,6 +214,7 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                     IdToNum.erase(id);
                                 }
                                 idToNetIOStream.erase(id);
+                                connectedIds.erase(id);
                                 
                                 // Test connect and get room count
                                 int roomHave = testConnectLocked();
@@ -236,12 +237,15 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                             } else {
                                 // Add ID to socket map
                                 idToNetIOStream[id] = socket;
+                                connectedIds.insert(id);
                                 
                                 // Send ENTER_ROOM to current socket
                                 GameNetData privateData;
                                 privateData.setType(0);
                                 privateData.setData("ENTER_ROOM");
                                 sendData(socket, privateData);
+                                
+                                // Add ID to number map
                                 
                                 int roomHave = testConnectLocked();
                                 
@@ -259,6 +263,29 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                             // Ignore errors during broadcast
                                         }
                                     }
+                                }
+
+                                if (roomHave == 3) {
+                                    GameNetData data;
+                                    data.setType(10);
+                                    data.setData("GAME_STARTED");
+                                    int index = 0;
+                                    for (const std::string id : connectedIds) {
+                                        IdToNum[id] = index++;
+                                        numToId[index - 1] = id;
+                                    }
+                                    data.setIdToNum(IdToNum);
+                                    for (auto const& [currId, s] : idToNetIOStream) {
+                                        if (s) {
+                                            try {
+                                                sendData(s, data);
+                                            } catch (...) {
+                                                // Ignore errors during broadcast
+                                            }
+                                        }
+                                    }
+                                    gameStarted = true;
+                                    startTimer(180);
                                 }
                             }
                         }
@@ -305,6 +332,7 @@ void GameServer::handleTimer(const boost::system::error_code& error) {
 }
 
 void GameServer::timeUp() {
+    gameStarted = false;
     // TODO: Handle time up logic
 }
 
@@ -407,6 +435,16 @@ void GameServer::setPlayer4Score(int score) {
     player4Score = score; 
 }
 
+std::set<std::string> GameServer::getConnectedIDs() const {
+    std::lock_guard<std::mutex> lock(gameMutex);
+    return connectedIds;
+}
+
+void GameServer::setConnectedIDs(const std::set<std::string>& ids) {
+    std::lock_guard<std::mutex> lock(gameMutex);
+    connectedIds = ids;
+}
+
 void GameServer::globalSend(GameNetData data) {
     std::lock_guard<std::mutex> lock(gameMutex);
     for (auto const& [id, socket] : idToNetIOStream) {
@@ -470,6 +508,7 @@ int GameServer::testConnectLocked() {
             IdToNum.erase(id);
         }
         idToNetIOStream.erase(id);
+        connectedIds.erase(id);
     }
     
     std::cout << "[GameServer][Info]: Active connections count: " << idToNetIOStream.size() << std::endl;

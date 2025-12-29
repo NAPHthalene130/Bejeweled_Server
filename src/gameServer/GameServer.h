@@ -9,6 +9,7 @@
 #include <map>
 #include <boost/asio.hpp>
 #include "GameNetData.h"
+#include <set>
 
 class GameServer {
     using tcp = boost::asio::ip::tcp;
@@ -76,8 +77,11 @@ public:
     int getPlayer4Score() const;
     void setPlayer4Score(int score);
 
+    std::set<std::string> getConnectedIDs() const;
+    void setConnectedIDs(const std::set<std::string>& ids);
+
 private:
-    std::mutex gameMutex;
+    mutable std::mutex gameMutex;
     boost::asio::io_context ioContext;
     boost::asio::ip::tcp::acceptor acceptor;
     std::vector<std::thread> workerThreads;
@@ -101,11 +105,13 @@ private:
     int player3Score = 0;
     int player4Score = 0;
 
+    std::set<std::string> connectedIds;
     void handleAccept(std::shared_ptr<tcp::socket> socket,
                        const boost::system::error_code& error);
      void startAccept();
      int testConnectLocked();
      void handleTimer(const boost::system::error_code& error);
+
  };
 
 #endif // GAMESERVER_H

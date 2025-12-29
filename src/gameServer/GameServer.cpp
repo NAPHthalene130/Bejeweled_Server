@@ -296,7 +296,16 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     } else if (type == 3) {
                         // TODO
                     } else if (type == 4) {
-                        // TODO
+                        // Broadcast the received data to all connected clients
+                        for (auto const& [currId, s] : idToNetIOStream) {
+                            if (s) {
+                                try {
+                                    sendData(s, receivedData);
+                                } catch (...) {
+                                    // Ignore errors during broadcast
+                                }
+                            }
+                        }
                     }
                 }
             } else {

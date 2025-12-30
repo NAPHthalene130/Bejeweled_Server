@@ -1,7 +1,7 @@
 #ifndef AUTH_NET_DATA_H
 #define AUTH_NET_DATA_H
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 class AuthNetData{
     using string = std::string;

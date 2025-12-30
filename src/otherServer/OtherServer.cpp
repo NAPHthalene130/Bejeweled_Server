@@ -1,6 +1,6 @@
 #include "OtherServer.h"
 #include <functional>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "../util/SqlUtil.h"
 
 using json = nlohmann::json;

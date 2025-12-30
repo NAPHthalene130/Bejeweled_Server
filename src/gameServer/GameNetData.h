@@ -1,7 +1,7 @@
 #ifndef GAME_NET_DATA_H
 #define GAME_NET_DATA_H
 #include <string>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <map>
 

@@ -105,3 +105,6 @@ src/Config.h
 ./cache
 .VSCodeCounter
 src/Config.h
+
+#vcpkg
+vcpkg_installed/

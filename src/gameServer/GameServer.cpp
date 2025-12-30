@@ -1,6 +1,6 @@
 #include "GameServer.h"
 #include <functional>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

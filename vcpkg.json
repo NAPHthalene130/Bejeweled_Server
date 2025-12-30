@@ -1,0 +1,15 @@
+{
+  "name": "bejeweled-server",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "boost",
+    {
+      "name": "mysql-connector-cpp",
+      "features": [
+        "jdbc"
+      ]
+    },
+    "openssl",
+    "nlohmann-json"
+  ]
+}

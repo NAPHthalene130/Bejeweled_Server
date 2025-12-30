@@ -274,6 +274,10 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                         IdToNum[id] = index++;
                                         numToId[index - 1] = id;
                                     }
+                                    player1Score = 0;
+                                    player2Score = 0;
+                                    player3Score = 0;
+                                    player4Score = 0;
                                     data.setIdToNum(IdToNum);
                                     for (auto const& [currId, s] : idToNetIOStream) {
                                         if (s) {
@@ -285,7 +289,7 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                         }
                                     }
                                     gameStarted = true;
-                                    startTimer(180);
+                                    startTimer(10);
                                 }
                             }
                         }
@@ -364,6 +368,19 @@ void GameServer::handleTimer(const boost::system::error_code& error) {
 void GameServer::timeUp() {
     gameStarted = false;
     // TODO: Handle time up logic
+    GameNetData timeUpData;
+    timeUpData.setType(12);
+    timeUpData.setData("Time Up");
+    timeUpData.setIdToNum(IdToNum);
+    timeUpData.setNumToId(numToId);
+    timeUpData.setPlayer1Score(player1Score);
+    timeUpData.setPlayer2Score(player2Score);
+    timeUpData.setPlayer3Score(player3Score);
+    timeUpData.setPlayer4Score(player4Score);
+    globalSend(timeUpData);
+    idToNetIOStream.clear();
+    IdToNum.clear();
+    numToId.clear();
 }
 
 void GameServer::resetGame() {

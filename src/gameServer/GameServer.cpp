@@ -289,7 +289,7 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                         }
                                     }
                                     gameStarted = true;
-                                    startTimer(10);
+                                    startTimer(30);
                                 }
                             }
                         }
@@ -346,9 +346,47 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
         if (error != boost::asio::error::operation_aborted) {
             std::cerr << "[GameServer][Error]: Receive error: " << error.message() << std::endl;
         }
+        // Ensure we clean up the connection on error as well
+        removeConnection(socket);
     } else {
         // Connection closed
         std::cout << "[GameServer][Info]: Connection closed by peer" << std::endl;
+        removeConnection(socket);
+    }
+}
+
+void GameServer::removeConnection(std::shared_ptr<tcp::socket> socket) {
+    std::lock_guard<std::mutex> lock(gameMutex);
+    std::string idToRemove;
+    for (auto const& [id, s] : idToNetIOStream) {
+        if (s == socket) {
+            idToRemove = id;
+            break;
+        }
+    }
+    if (!idToRemove.empty()) {
+        idToNetIOStream.erase(idToRemove);
+        connectedIds.erase(idToRemove);
+        if (IdToNum.count(idToRemove)) {
+            int num = IdToNum[idToRemove];
+            numToId.erase(num);
+            IdToNum.erase(idToRemove);
+        }
+        std::cout << "[GameServer][Info]: Removed connection for ID: " << idToRemove << std::endl;
+        
+        int roomHave = testConnectLocked();
+        GameNetData broadcastData;
+        broadcastData.setType(11);
+        broadcastData.setData(std::to_string(roomHave));
+        
+        for (auto const& [currId, s] : idToNetIOStream) {
+            if (s) {
+                try {
+                    sendData(s, broadcastData);
+                } catch (...) {
+                }
+            }
+        }
     }
 }
 

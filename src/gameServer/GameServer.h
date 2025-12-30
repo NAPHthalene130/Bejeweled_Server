@@ -36,6 +36,7 @@ public:
     void sendData(std::shared_ptr<tcp::socket> socket, GameNetData data);
     void sendData(const std::string& id, GameNetData data);
     int testConnect();
+    void removeConnection(std::shared_ptr<tcp::socket> socket);
 
     // Getters and Setters
     bool getGameStarted() const;

@@ -289,7 +289,7 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                                         }
                                     }
                                     gameStarted = true;
-                                    startTimer(30);
+                                    startTimer(90);
                                 }
                             }
                         }
@@ -299,14 +299,22 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                         std::string id = receivedData.getID();
                         if (IdToNum.find(id) != IdToNum.end()) {
                             int num = IdToNum[id];
-                            if (num == 0) {
-                                player1Score = stoi(receivedData.getData());
-                            } else if (num == 1) {
-                                player2Score = stoi(receivedData.getData());
-                            } else if (num == 2) {
-                                player3Score = stoi(receivedData.getData());
-                            } else if (num == 3) {
-                                player4Score = stoi(receivedData.getData());
+                            try {
+                                std::string dataStr = receivedData.getData();
+                                if (!dataStr.empty()) {
+                                    int score = std::stoi(dataStr);
+                                    if (num == 0) {
+                                        player1Score = score;
+                                    } else if (num == 1) {
+                                        player2Score = score;
+                                    } else if (num == 2) {
+                                        player3Score = score;
+                                    } else if (num == 3) {
+                                        player4Score = score;
+                                    }
+                                }
+                            } catch (const std::exception& e) {
+                                std::cerr << "[GameServer][Error]: Invalid score data for type 2: " << receivedData.getData() << ", error: " << e.what() << std::endl;
                             }
                         }
                         for (auto const& [currId, s] : idToNetIOStream) {
@@ -321,7 +329,20 @@ void GameServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     } else if (type == 3) {
                         // TODO
                     } else if (type == 4) {
-                        // Broadcast the received data to all connected clients
+                        std::string id = receivedData.getID();
+                        int score = receivedData.getMyScore();
+                        if (IdToNum.find(id) != IdToNum.end()) {
+                            int num = IdToNum[id];
+                            if (num == 0) {
+                                player1Score = score;
+                            } else if (num == 1) {
+                                player2Score = score;
+                            } else if (num == 2) {
+                                player3Score = score;
+                            } else if (num == 3) {
+                                player4Score = score;
+                            }
+                        }
                         for (auto const& [currId, s] : idToNetIOStream) {
                             if (s) {
                                 try {
@@ -404,6 +425,7 @@ void GameServer::handleTimer(const boost::system::error_code& error) {
 }
 
 void GameServer::timeUp() {
+    std::lock_guard<std::mutex> lock(gameMutex);
     gameStarted = false;
     // TODO: Handle time up logic
     GameNetData timeUpData;
@@ -415,10 +437,23 @@ void GameServer::timeUp() {
     timeUpData.setPlayer2Score(player2Score);
     timeUpData.setPlayer3Score(player3Score);
     timeUpData.setPlayer4Score(player4Score);
-    globalSend(timeUpData);
+    
+    // Send to all clients
+    for (auto const& [id, socket] : idToNetIOStream) {
+        if (socket) {
+            try {
+                sendData(socket, timeUpData);
+            } catch (...) {
+                // Ignore errors during broadcast
+            }
+        }
+    }
+    
     idToNetIOStream.clear();
     IdToNum.clear();
     numToId.clear();
+    connectedIds.clear();
+    roomPeopleHave = 0;
 }
 
 void GameServer::resetGame() {
@@ -428,6 +463,7 @@ void GameServer::resetGame() {
     IdToNum.clear();
     numToId.clear();
     idToNetIOStream.clear();
+    connectedIds.clear();
     player1Board.clear();
     player2Board.clear();
     player3Board.clear();

@@ -2,6 +2,7 @@
 #include <functional>
 #include <nlohmann/json.hpp>
 #include "../util/SqlUtil.h"
+#include "OtherNetData.h"
 
 using json = nlohmann::json;
 
@@ -194,25 +195,25 @@ void OtherServer::handleReceive(std::shared_ptr<tcp::socket> socket,
 
                 if (parseSuccess) {
                     int type = receivedData.getType();
-                    if (type == 10) { //客户端获取成就
-                        std::string id = receivedData.getId();
-                        std::string achievementStr = SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(id);
+                    if (type == 10) { // Client get achievement
+                        std::string playerID = receivedData.getId();
+                        std::string achievementStr = SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(playerID);
                         receivedData.setAchievementStr(achievementStr);
                         sendData(socket, receivedData);
-                    } else if (type == 11) { //客户端设置成就
-                        std::string id = receivedData.getId();
+                    } else if (type == 11) { // Client set achievement
+                        std::string playerID = receivedData.getId();
                         std::string achievementStr = receivedData.getAchievementStr();
-                        SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(id, achievementStr);
-                    } else if (type == 20) { //客户端获取钱数量
-                        std::string id = receivedData.getId();
-                        int money = SqlUtil::getMoneyByPlayerIDfromPlayerinfo(id);
+                        SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(playerID, achievementStr);
+                    } else if (type == 20) { // Client get money
+                        std::string playerID = receivedData.getId();
+                        int money = SqlUtil::getMoneyByPlayerIDfromPlayerinfo(playerID);
                         receivedData.setMoney(money);
                         sendData(socket, receivedData);
-                    } else if (type == 21) { //客户端设置钱数量
-                        std::string id = receivedData.getId();
+                    } else if (type == 21) { // Client set money
+                        std::string playerID = receivedData.getId();
                         int money = receivedData.getMoney();
-                        SqlUtil::setMoneyByPlayerIDfromPlayerinfo(id, money);
-                    } else if (type == 30) { //客户端获取排行榜
+                        SqlUtil::setMoneyByPlayerIDfromPlayerinfo(playerID, money);
+                    } else if (type == 30) { // Client get rank
                         std::vector<std::vector<std::pair<std::string, int>>> ranks = SqlUtil::getRanksFromPlayerinfo();
                         receivedData.setNormalRank(ranks[0]);
                         receivedData.setWhirlRank(ranks[1]);
@@ -220,24 +221,24 @@ void OtherServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                         sendData(socket, receivedData);
                     } else if (type == 31) {
                         // TODO
-                    } else if (type == 40) { //客户端获取道具数量
-                        std::string id = receivedData.getId();
-                        std::vector<int> propNums = SqlUtil::getPropsFromPlayerinfo(id);
+                    } else if (type == 40) { // Client get prop nums
+                        std::string playerID = receivedData.getId();
+                        std::vector<int> propNums = SqlUtil::getPropsFromPlayerinfo(playerID);
                         receivedData.setPropNums(propNums);
                         sendData(socket, receivedData);
-                    } else if (type == 41) { //客户端设置道具数量
-                        std::string id = receivedData.getId();
+                    } else if (type == 41) { // Client set prop nums
+                        std::string playerID = receivedData.getId();
                         std::vector<int> propNums = receivedData.getPropNums();
-                        SqlUtil::setPropsFromPlayerinfo(id, propNums);
-                    } else if (type == 50) { //客户端提交普通模式时间
-                        std::string id = receivedData.getId();
+                        SqlUtil::setPropsFromPlayerinfo(playerID, propNums);
+                    } else if (type == 50) { // Client submit normal mode time
+                        std::string playerID = receivedData.getId();
                         int normalTime = receivedData.getNormalTime();
-                        SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(id, normalTime);
-                    } else if (type == 51) { //客户端提交旋风模式时间
+                        SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(playerID, normalTime);
+                    } else if (type == 51) { // Client submit whirl mode time
                         // TODO
-                        std::string id = receivedData.getId();
+                        std::string playerID = receivedData.getId();
                         int whirlTime = receivedData.getWhirlTime();
-                        SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(id, whirlTime);
+                        SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(playerID, whirlTime);
                     }
                 }
             } else {

@@ -194,18 +194,25 @@ void OtherServer::handleReceive(std::shared_ptr<tcp::socket> socket,
 
                 if (parseSuccess) {
                     int type = receivedData.getType();
-                    
-                    if (type == 10) {
+                    if (type == 10) { //客户端获取成就
                         // TODO
-                    } else if (type == 11) {
+                    } else if (type == 11) { //客户端设置成就
                         // TODO
-                    } else if (type == 20) {
+                    } else if (type == 20) { //客户端获取钱数量
                         // TODO
-                    } else if (type == 21) {
+                    } else if (type == 21) { //客户端设置钱数量
                         // TODO
-                    } else if (type == 30) {
+                    } else if (type == 30) { //客户端获取排行榜
                         // TODO
                     } else if (type == 31) {
+                        // TODO
+                    } else if (type == 40) { //客户端获取道具数量
+
+                    } else if (type == 41) { //客户端设置道具数量
+
+                    } else if (type == 50) { //客户端提交普通模式时间
+                        // TODO
+                    } else if (type == 51) { //客户端提交旋风模式时间
                         // TODO
                     }
                 }

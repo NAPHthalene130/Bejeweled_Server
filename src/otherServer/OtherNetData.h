@@ -19,7 +19,11 @@ public:
     const std::vector<std::pair<std::string, int>>& getMultiRank() const;
     int getType() const;
     const std::string& getData() const;
+    const std::vector<int>& getPropNums() const;
+    int getNormalTime() const;
+    int getWhirlTime() const;
 
+    
     void setId(const std::string& id);
     void setMoney(int money);
     void setAchievementStr(const std::string& achievementStr);
@@ -28,6 +32,9 @@ public:
     void setMultiRank(const std::vector<std::pair<std::string, int>>& multiRank);
     void setType(int type);
     void setData(const std::string& data);
+    void setPropNums(const std::vector<int>& propNums);
+    void setNormalTime(int normalTime);
+    void setWhirlTime(int whirlTime);
 
 private:
     int type;
@@ -38,9 +45,11 @@ private:
     std::vector<std::pair<std::string, int>> normalRank;
     std::vector<std::pair<std::string, int>> whirlRank;
     std::vector<std::pair<std::string, int>> multiRank;
-
+    std::vector<int> propNums;
     friend void to_json(nlohmann::json& j, const OtherNetData& p);
     friend void from_json(const nlohmann::json& j, OtherNetData& p);
+    int normalTime;
+    int whirlTime;
 };
 
 #endif // OTHER_NET_DATA_H

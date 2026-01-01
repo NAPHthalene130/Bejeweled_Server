@@ -9,6 +9,9 @@ const std::vector<std::pair<std::string, int>>& OtherNetData::getWhirlRank() con
 const std::vector<std::pair<std::string, int>>& OtherNetData::getMultiRank() const { return multiRank; }
 int OtherNetData::getType() const { return type; }
 const std::string& OtherNetData::getData() const { return data; }
+const std::vector<int>& OtherNetData::getPropNums() const { return propNums; }
+int OtherNetData::getNormalTime() const { return normalTime; }
+int OtherNetData::getWhirlTime() const { return whirlTime; }
 
 // Implement Setters
 void OtherNetData::setId(const std::string& id) { this->id = id; }
@@ -19,6 +22,9 @@ void OtherNetData::setWhirlRank(const std::vector<std::pair<std::string, int>>& 
 void OtherNetData::setMultiRank(const std::vector<std::pair<std::string, int>>& multiRank) { this->multiRank = multiRank; }
 void OtherNetData::setType(int type) { this->type = type; }
 void OtherNetData::setData(const std::string& data) { this->data = data; }
+void OtherNetData::setPropNums(const std::vector<int>& propNums) { this->propNums = propNums; }
+void OtherNetData::setNormalTime(int normalTime) { this->normalTime = normalTime; }
+void OtherNetData::setWhirlTime(int whirlTime) { this->whirlTime = whirlTime; }
 
 // Implement JSON functions
 void to_json(nlohmann::json& j, const OtherNetData& p) {
@@ -30,7 +36,10 @@ void to_json(nlohmann::json& j, const OtherNetData& p) {
         {"achievementStr", p.achievementStr},
         {"normalRank", p.normalRank},
         {"whirlRank", p.whirlRank},
-        {"multiRank", p.multiRank}
+        {"multiRank", p.multiRank},
+        {"propNums", p.propNums},
+        {"normalTime", p.normalTime},
+        {"whirlTime", p.whirlTime}
     };
 }
 
@@ -43,4 +52,7 @@ void from_json(const nlohmann::json& j, OtherNetData& p) {
     if(j.contains("normalRank")) j.at("normalRank").get_to(p.normalRank);
     if(j.contains("whirlRank")) j.at("whirlRank").get_to(p.whirlRank);
     if(j.contains("multiRank")) j.at("multiRank").get_to(p.multiRank);
+    if(j.contains("propNums")) j.at("propNums").get_to(p.propNums);
+    if(j.contains("normalTime")) j.at("normalTime").get_to(p.normalTime);
+    if(j.contains("whirlTime")) j.at("whirlTime").get_to(p.whirlTime);
 }

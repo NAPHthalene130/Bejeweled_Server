@@ -1,6 +1,7 @@
 #include "GameServer.h"
 #include <functional>
 #include <nlohmann/json.hpp>
+#include "../util/SqlUtil.h"
 
 using json = nlohmann::json;
 
@@ -448,7 +449,14 @@ void GameServer::timeUp() {
             }
         }
     }
-    
+    std::string id1 = numToId[0];
+    std::string id2 = numToId[1];
+    std::string id3 = numToId[2];
+
+    SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(id1, player1Score);
+    SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(id2, player2Score);
+    SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(id3, player3Score);
+
     idToNetIOStream.clear();
     IdToNum.clear();
     numToId.clear();

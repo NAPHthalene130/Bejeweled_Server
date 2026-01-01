@@ -195,25 +195,49 @@ void OtherServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                 if (parseSuccess) {
                     int type = receivedData.getType();
                     if (type == 10) { //客户端获取成就
-                        // TODO
+                        std::string id = receivedData.getId();
+                        std::string achievementStr = SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(id);
+                        receivedData.setAchievementStr(achievementStr);
+                        sendData(socket, receivedData);
                     } else if (type == 11) { //客户端设置成就
-                        // TODO
+                        std::string id = receivedData.getId();
+                        std::string achievementStr = receivedData.getAchievementStr();
+                        SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(id, achievementStr);
                     } else if (type == 20) { //客户端获取钱数量
-                        // TODO
+                        std::string id = receivedData.getId();
+                        int money = SqlUtil::getMoneyByPlayerIDfromPlayerinfo(id);
+                        receivedData.setMoney(money);
+                        sendData(socket, receivedData);
                     } else if (type == 21) { //客户端设置钱数量
-                        // TODO
+                        std::string id = receivedData.getId();
+                        int money = receivedData.getMoney();
+                        SqlUtil::setMoneyByPlayerIDfromPlayerinfo(id, money);
                     } else if (type == 30) { //客户端获取排行榜
-                        // TODO
+                        std::vector<std::vector<std::pair<std::string, int>>> ranks = SqlUtil::getRanksFromPlayerinfo();
+                        receivedData.setNormalRank(ranks[0]);
+                        receivedData.setWhirlRank(ranks[1]);
+                        receivedData.setMultiRank(ranks[2]);
+                        sendData(socket, receivedData);
                     } else if (type == 31) {
                         // TODO
                     } else if (type == 40) { //客户端获取道具数量
-
+                        std::string id = receivedData.getId();
+                        std::vector<int> propNums = SqlUtil::getPropsFromPlayerinfo(id);
+                        receivedData.setPropNums(propNums);
+                        sendData(socket, receivedData);
                     } else if (type == 41) { //客户端设置道具数量
-
+                        std::string id = receivedData.getId();
+                        std::vector<int> propNums = receivedData.getPropNums();
+                        SqlUtil::setPropsFromPlayerinfo(id, propNums);
                     } else if (type == 50) { //客户端提交普通模式时间
-                        // TODO
+                        std::string id = receivedData.getId();
+                        int normalTime = receivedData.getNormalTime();
+                        SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(id, normalTime);
                     } else if (type == 51) { //客户端提交旋风模式时间
                         // TODO
+                        std::string id = receivedData.getId();
+                        int whirlTime = receivedData.getWhirlTime();
+                        SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(id, whirlTime);
                     }
                 }
             } else {

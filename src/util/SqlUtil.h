@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 class SqlUtil {
 public:
@@ -24,6 +25,26 @@ public:
     static bool authEmailCode(std::string emailCode, std::string email);
     static int authPasswordFromPlayerinfo(std::string playerID, std::string password);
     static int registerFromPlayerinfo(std::string playerID, std::string password);
+
+    static std::vector<int> getPropsFromPlayerinfo(std::string playerID);
+    static bool setPropsFromPlayerinfo(std::string playerID, std::vector<int> props);
+
+    static int getMoneyByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setMoneyByPlayerIDfromPlayerinfo(std::string playerID, int money);
+
+    static int getNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID, int normalSeconds);
+
+    static int getWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID, int whirlSeconds);
+
+    static int getMultiScoreByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setMultiScoreByPlayerIDfromPlayerinfo(std::string playerID, int multiScore);
+
+    static std::string getAchievementStrByPlayerIDfromPlayerinfo(std::string playerID);
+    static void setAchievementStrByPlayerIDfromPlayerinfo(std::string playerID, std::string achievementStr);
+
+    static std::vector<std::vector<std::pair<std::string, int>>> getRanksFromPlayerinfo();
 };
 
 

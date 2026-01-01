@@ -293,4 +293,249 @@ void SqlUtil::setIterationsByPlayerIDfromPlayerinfo(std::string playerID, int it
     stmt->executeUpdate("UPDATE playerinfo SET iterations = " + std::to_string(iterations) + " WHERE playerID = '" + playerID + "'");
 }
 
+std::vector<int> SqlUtil::getPropsFromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT prop_freeze, prop_hammer, prop_resetTable, prop_clearTable FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            std::vector<int> props;
+            props.push_back(res->getInt("prop_freeze"));
+            props.push_back(res->getInt("prop_hammer"));
+            props.push_back(res->getInt("prop_resetTable"));
+            props.push_back(res->getInt("prop_clearTable"));
+            return props;
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getPropsFromPlayerinfo: " << e.what() << std::endl;
+    }
+    return {0, 0, 0, 0};
+}
+
+bool SqlUtil::setPropsFromPlayerinfo(std::string playerID, std::vector<int> props) {
+    if (props.size() != 4) return false;
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET prop_freeze = ?, prop_hammer = ?, prop_resetTable = ?, prop_clearTable = ? WHERE playerID = ?"));
+        pstmt->setInt(1, props[0]);
+        pstmt->setInt(2, props[1]);
+        pstmt->setInt(3, props[2]);
+        pstmt->setInt(4, props[3]);
+        pstmt->setString(5, playerID);
+        pstmt->executeUpdate();
+        return true;
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setPropsFromPlayerinfo: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+int SqlUtil::getMoneyByPlayerIDfromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT money FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            return res->getInt("money");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getMoney: " << e.what() << std::endl;
+    }
+    return 0;
+}
+
+void SqlUtil::setMoneyByPlayerIDfromPlayerinfo(std::string playerID, int money) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET money = ? WHERE playerID = ?"));
+        pstmt->setInt(1, money);
+        pstmt->setString(2, playerID);
+        pstmt->executeUpdate();
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setMoney: " << e.what() << std::endl;
+    }
+}
+
+int SqlUtil::getNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT normalSeconds FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            return res->getInt("normalSeconds");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getNormalSeconds: " << e.what() << std::endl;
+    }
+    return 99999;
+}
+
+void SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID, int normalSeconds) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET normalSeconds = ? WHERE playerID = ?"));
+        pstmt->setInt(1, normalSeconds);
+        pstmt->setString(2, playerID);
+        pstmt->executeUpdate();
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setNormalSeconds: " << e.what() << std::endl;
+    }
+}
+
+int SqlUtil::getWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT whirlSeconds FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            return res->getInt("whirlSeconds");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getWhirlSeconds: " << e.what() << std::endl;
+    }
+    return 99999;
+}
+
+void SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID, int whirlSeconds) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET whirlSeconds = ? WHERE playerID = ?"));
+        pstmt->setInt(1, whirlSeconds);
+        pstmt->setString(2, playerID);
+        pstmt->executeUpdate();
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setWhirlSeconds: " << e.what() << std::endl;
+    }
+}
+
+int SqlUtil::getMultiScoreByPlayerIDfromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT multiScore FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            return res->getInt("multiScore");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getMultiScore: " << e.what() << std::endl;
+    }
+    return 0;
+}
+
+void SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(std::string playerID, int multiScore) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET multiScore = ? WHERE playerID = ?"));
+        pstmt->setInt(1, multiScore);
+        pstmt->setString(2, playerID);
+        pstmt->executeUpdate();
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setMultiScore: " << e.what() << std::endl;
+    }
+}
+
+std::string SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(std::string playerID) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT achievementStr FROM playerinfo WHERE playerID = ?"));
+        pstmt->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        if (res->next()) {
+            return res->getString("achievementStr");
+        }
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getAchievementStr: " << e.what() << std::endl;
+    }
+    return "0000000000";
+}
+
+void SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(std::string playerID, std::string achievementStr) {
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET achievementStr = ? WHERE playerID = ?"));
+        pstmt->setString(1, achievementStr);
+        pstmt->setString(2, playerID);
+        pstmt->executeUpdate();
+    } catch (std::exception &e) {
+        std::cerr << "Exception in setAchievementStr: " << e.what() << std::endl;
+    }
+}
+
+std::vector<std::vector<std::pair<std::string, int>>> SqlUtil::getRanksFromPlayerinfo() {
+    std::vector<std::vector<std::pair<std::string, int>>> ranks;
+    try {
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
+        conn->setSchema("bejeweled");
+
+        // 1. Normal Seconds (Ascending)
+        {
+            std::vector<std::pair<std::string, int>> normalRank;
+            std::unique_ptr<sql::Statement> stmt(conn->createStatement());
+            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT playerID, normalSeconds FROM playerinfo ORDER BY normalSeconds ASC LIMIT 10"));
+            while (res->next()) {
+                normalRank.push_back({res->getString("playerID"), res->getInt("normalSeconds")});
+            }
+            ranks.push_back(normalRank);
+        }
+
+        // 2. Whirl Seconds (Ascending)
+        {
+            std::vector<std::pair<std::string, int>> whirlRank;
+            std::unique_ptr<sql::Statement> stmt(conn->createStatement());
+            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT playerID, whirlSeconds FROM playerinfo ORDER BY whirlSeconds ASC LIMIT 10"));
+            while (res->next()) {
+                whirlRank.push_back({res->getString("playerID"), res->getInt("whirlSeconds")});
+            }
+            ranks.push_back(whirlRank);
+        }
+
+        // 3. Multi Score (Descending)
+        {
+            std::vector<std::pair<std::string, int>> multiRank;
+            std::unique_ptr<sql::Statement> stmt(conn->createStatement());
+            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT playerID, multiScore FROM playerinfo ORDER BY multiScore DESC LIMIT 10"));
+            while (res->next()) {
+                multiRank.push_back({res->getString("playerID"), res->getInt("multiScore")});
+            }
+            ranks.push_back(multiRank);
+        }
+
+        return ranks;
+
+    } catch (std::exception &e) {
+        std::cerr << "Exception in getRanksFromPlayerinfo: " << e.what() << std::endl;
+        return {};
+    }
+}
+
 

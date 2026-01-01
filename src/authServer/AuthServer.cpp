@@ -191,16 +191,12 @@ void AuthServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     }
                 } else if (receivedData.getType() == 2) { // Register
                     responseData.setType(2);
-                    int registerResult = SqlUtil::registerFromPlayerinfo(receivedData.getId(), receivedData.getPassword(), receivedData.getEmail(), "", receivedData.getData());
+                    int registerResult = SqlUtil::registerFromPlayerinfo(receivedData.getId(), receivedData.getPassword());
                     if (registerResult == 1) { // Success
                         responseData.setData("REGISTER_SUCCESS");
-                    } else if (registerResult == 2) { // Email Code Error
-                        responseData.setData("REGISTER_FAIL_EMAILCODE");
                     } else if (registerResult == 3) { // Account Exists
                         responseData.setData("REGISTER_FAIL_ACCOUNT");
-                    } else if (registerResult == 4) {  // Email Exists
-                        responseData.setData("REGISTER_FAIL_EMAIL");
-                    } else if (registerResult == 5) { // Unknown Error
+                    } else { // Unknown Error
                         responseData.setData("REGISTER_FAIL_UNKNOWN");
                     }
                 } else if (receivedData.getType() == 3) { // Verify Code

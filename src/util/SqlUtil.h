@@ -23,7 +23,7 @@ public:
     
     static bool authEmailCode(std::string emailCode, std::string email);
     static int authPasswordFromPlayerinfo(std::string playerID, std::string password);
-    static int registerFromPlayerinfo(std::string playerID, std::string password, std::string email, std::string styleSet, std::string emailCode);
+    static int registerFromPlayerinfo(std::string playerID, std::string password);
 };
 
 

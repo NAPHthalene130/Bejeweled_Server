@@ -127,14 +127,9 @@ int SqlUtil::authPasswordFromPlayerinfo(std::string playerID, std::string passwo
     }
 }
 
-int SqlUtil::registerFromPlayerinfo(std::string playerID, std::string password, std::string email, std::string styleSet, std::string emailCode) {
+int SqlUtil::registerFromPlayerinfo(std::string playerID, std::string password) {
     try {
         std::cout << "[Register] Starting registration for ID: " << playerID << std::endl;
-        
-        if (!authEmailCode(emailCode, email)) {
-            std::cout << "[Register] Email code auth failed" << std::endl;
-            return 2;
-        }
         
         std::cout << "[Register] Connecting to DB..." << std::endl;
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
@@ -153,33 +148,41 @@ int SqlUtil::registerFromPlayerinfo(std::string playerID, std::string password, 
             }
         }
 
-        // Check if email exists
-        {
-            std::cout << "[Register] Checking if email exists..." << std::endl;
-            std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("SELECT email FROM playerinfo WHERE email = ?"));
-            pstmt->setString(1, email);
-            std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
-            if (res->next()) {
-                std::cout << "[Register] Email already exists" << std::endl;
-                return 4; // Email exists
-            }
-        }
-
         // Security: Generate Salt and Hash
         std::cout << "[Register] Generating salt and hash..." << std::endl;
         std::string salt = generateSalt();
-        int iterations = 10000;
+        
+        // Random iterations (10000 + random(0-5000))
+        unsigned short randVal = 0;
+        if (RAND_bytes((unsigned char*)&randVal, sizeof(randVal)) != 1) {
+             randVal = 1234; // Fallback
+        }
+        int iterations = 10000 + (randVal % 5001);
+
         std::string passwordHash = hashPassword(password, salt, iterations);
 
         // Insert new user
         std::cout << "[Register] Inserting new user..." << std::endl;
-        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("INSERT INTO playerinfo (playerID, playerPassword, email, styleSet, salt, iterations) VALUES (?, ?, ?, ?, ?, ?)"));
+        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement(
+            "INSERT INTO playerinfo (playerID, playerPassword, salt, iterations, "
+            "money, normalSeconds, whirlSeconds, multiScore, achievementStr, "
+            "prop_hammer, prop_resetTable, prop_clearTable, prop_freeze) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        ));
+        
         pstmt->setString(1, playerID);
         pstmt->setString(2, passwordHash);
-        pstmt->setString(3, email);
-        pstmt->setString(4, styleSet);
-        pstmt->setString(5, salt);
-        pstmt->setInt(6, iterations);
+        pstmt->setString(3, salt);
+        pstmt->setInt(4, iterations);
+        pstmt->setInt(5, 0);            // money
+        pstmt->setInt(6, 99999);        // normalSeconds
+        pstmt->setInt(7, 99999);        // whirlSeconds
+        pstmt->setInt(8, 0);            // multiScore
+        pstmt->setString(9, "0000000000"); // achievementStr
+        pstmt->setInt(10, 0);           // prop_hammer
+        pstmt->setInt(11, 0);           // prop_resetTable
+        pstmt->setInt(12, 0);           // prop_clearTable
+        pstmt->setInt(13, 0);           // prop_freeze
                             
         pstmt->executeUpdate();
         std::cout << "[Register] Insert successful" << std::endl;

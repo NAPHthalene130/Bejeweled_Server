@@ -408,11 +408,31 @@ void SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID, int
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
         conn->setSchema("bejeweled");
-        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET normalSeconds = ? WHERE playerID = ?"));
-        pstmt->setInt(1, normalSeconds);
-        pstmt->setString(2, playerID);
-        pstmt->executeUpdate();
-        std::cout << "[SqlUtil][Info]: NormalSeconds updated successfully for " << playerID << std::endl;
+
+        // Get current value
+        std::unique_ptr<sql::PreparedStatement> pstmtGet(conn->prepareStatement("SELECT normalSeconds FROM playerinfo WHERE playerID = ?"));
+        pstmtGet->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmtGet->executeQuery());
+        
+        int currentVal = 99999;
+        if (res->next()) {
+            currentVal = res->getInt("normalSeconds");
+        }
+
+        // Keep minimum
+        int finalVal = (normalSeconds < currentVal) ? normalSeconds : currentVal;
+
+        // Update if changed (optimization)
+        if (finalVal != currentVal) {
+             std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET normalSeconds = ? WHERE playerID = ?"));
+             pstmt->setInt(1, finalVal);
+             pstmt->setString(2, playerID);
+             pstmt->executeUpdate();
+             std::cout << "[SqlUtil][Info]: NormalSeconds updated successfully for " << playerID << " to " << finalVal << std::endl;
+        } else {
+             std::cout << "[SqlUtil][Info]: NormalSeconds not updated (new value " << normalSeconds << " >= current " << currentVal << ")" << std::endl;
+        }
+
     } catch (std::exception &e) {
         std::cerr << "[SqlUtil][Error]: Exception in setNormalSeconds: " << e.what() << std::endl;
     }
@@ -444,11 +464,32 @@ void SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID, int 
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
         conn->setSchema("bejeweled");
-        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET whirlSeconds = ? WHERE playerID = ?"));
-        pstmt->setInt(1, whirlSeconds);
-        pstmt->setString(2, playerID);
-        pstmt->executeUpdate();
-        std::cout << "[SqlUtil][Info]: WhirlSeconds updated successfully for " << playerID << std::endl;
+
+        // Get current value
+        std::unique_ptr<sql::PreparedStatement> pstmtGet(conn->prepareStatement("SELECT whirlSeconds FROM playerinfo WHERE playerID = ?"));
+        pstmtGet->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmtGet->executeQuery());
+        
+        int currentVal = 0;
+        if (res->next()) {
+            currentVal = res->getInt("whirlSeconds");
+        }
+        
+        // Handle potential legacy default value 99999 which blocks MAX logic
+        if (currentVal == 99999) currentVal = 0;
+
+        // Keep maximum
+        int finalVal = (whirlSeconds > currentVal) ? whirlSeconds : currentVal;
+
+        if (finalVal != currentVal || currentVal == 0) { // Update if changed or if it was 0 (potentially uninitialized)
+             std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET whirlSeconds = ? WHERE playerID = ?"));
+             pstmt->setInt(1, finalVal);
+             pstmt->setString(2, playerID);
+             pstmt->executeUpdate();
+             std::cout << "[SqlUtil][Info]: WhirlSeconds updated successfully for " << playerID << " to " << finalVal << std::endl;
+        } else {
+             std::cout << "[SqlUtil][Info]: WhirlSeconds not updated (new value " << whirlSeconds << " <= current " << currentVal << ")" << std::endl;
+        }
     } catch (std::exception &e) {
         std::cerr << "[SqlUtil][Error]: Exception in setWhirlSeconds: " << e.what() << std::endl;
     }
@@ -480,11 +521,29 @@ void SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(std::string playerID, int mu
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
         conn->setSchema("bejeweled");
-        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET multiScore = ? WHERE playerID = ?"));
-        pstmt->setInt(1, multiScore);
-        pstmt->setString(2, playerID);
-        pstmt->executeUpdate();
-        std::cout << "[SqlUtil][Info]: MultiScore updated successfully for " << playerID << std::endl;
+        
+        // Get current value
+        std::unique_ptr<sql::PreparedStatement> pstmtGet(conn->prepareStatement("SELECT multiScore FROM playerinfo WHERE playerID = ?"));
+        pstmtGet->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmtGet->executeQuery());
+        
+        int currentVal = 0;
+        if (res->next()) {
+            currentVal = res->getInt("multiScore");
+        }
+
+        // Keep maximum
+        int finalVal = (multiScore > currentVal) ? multiScore : currentVal;
+
+        if (finalVal != currentVal) {
+             std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET multiScore = ? WHERE playerID = ?"));
+             pstmt->setInt(1, finalVal);
+             pstmt->setString(2, playerID);
+             pstmt->executeUpdate();
+             std::cout << "[SqlUtil][Info]: MultiScore updated successfully for " << playerID << " to " << finalVal << std::endl;
+        } else {
+             std::cout << "[SqlUtil][Info]: MultiScore not updated (new value " << multiScore << " <= current " << currentVal << ")" << std::endl;
+        }
     } catch (std::exception &e) {
         std::cerr << "[SqlUtil][Error]: Exception in setMultiScore: " << e.what() << std::endl;
     }

@@ -1,6 +1,7 @@
 # Ignore build artifacts
 build/
 bin/
+vcpkg_installed/
 *.exe
 *.obj
 *.lib

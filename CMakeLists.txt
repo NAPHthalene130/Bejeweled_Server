@@ -5,12 +5,16 @@ set(VCPKG_INSTALL_OPTIONS "--allow-unsupported")
 
 # Set Vcpkg Toolchain if not specified
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(EXISTS "H:/vcpkg/scripts/buildsystems/vcpkg.cmake")
+    # Try to find vcpkg from environment variable
+    if(DEFINED ENV{VCPKG_ROOT})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+        message(STATUS "Found vcpkg via VCPKG_ROOT: ${CMAKE_TOOLCHAIN_FILE}")
+    # Fallback to local known path (Development convenience)
+    elseif(EXISTS "H:/vcpkg/scripts/buildsystems/vcpkg.cmake")
         set(CMAKE_TOOLCHAIN_FILE "H:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-        message(STATUS "Using VCPKG toolchain: ${CMAKE_TOOLCHAIN_FILE}")
-    elseif(WIN32)
-        # Fallback or user prompt
-        message(STATUS "VCPKG toolchain not found at default location.")
+        message(STATUS "Using local vcpkg: ${CMAKE_TOOLCHAIN_FILE}")
+    else()
+        message(STATUS "VCPKG toolchain not found. If you intend to use vcpkg, please set CMAKE_TOOLCHAIN_FILE or VCPKG_ROOT.")
     endif()
 endif()
 

@@ -181,7 +181,7 @@ int SqlUtil::registerFromPlayerinfo(std::string playerID, std::string password) 
         pstmt->setInt(4, iterations);
         pstmt->setInt(5, 0);            // money
         pstmt->setInt(6, 99999);        // normalSeconds
-        pstmt->setInt(7, 99999);        // whirlSeconds
+        pstmt->setInt(7, 0);        // whirlSeconds
         pstmt->setInt(8, 0);            // multiScore
         pstmt->setString(9, "0000000000"); // achievementStr
         pstmt->setInt(10, 0);           // prop_hammer

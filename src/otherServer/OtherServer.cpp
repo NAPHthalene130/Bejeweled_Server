@@ -197,47 +197,57 @@ void OtherServer::handleReceive(std::shared_ptr<tcp::socket> socket,
                     int type = receivedData.getType();
                     if (type == 10) { // Client get achievement
                         std::string playerID = receivedData.getId();
+                        std::cout << "[OtherServer][Info]: Client request get achievement: " << playerID << std::endl;
                         std::string achievementStr = SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(playerID);
                         receivedData.setAchievementStr(achievementStr);
                         sendData(socket, receivedData);
                     } else if (type == 11) { // Client set achievement
                         std::string playerID = receivedData.getId();
                         std::string achievementStr = receivedData.getAchievementStr();
+                        std::cout << "[OtherServer][Info]: Client request set achievement: " << playerID << ", " << achievementStr << std::endl;
                         SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(playerID, achievementStr);
                     } else if (type == 20) { // Client get money
                         std::string playerID = receivedData.getId();
+                        std::cout << "[OtherServer][Info]: Client request get money: " << playerID << std::endl;
                         int money = SqlUtil::getMoneyByPlayerIDfromPlayerinfo(playerID);
                         receivedData.setMoney(money);
                         sendData(socket, receivedData);
                     } else if (type == 21) { // Client set money
                         std::string playerID = receivedData.getId();
                         int money = receivedData.getMoney();
+                        std::cout << "[OtherServer][Info]: Client request set money: " << playerID << ", " << money << std::endl;
                         SqlUtil::setMoneyByPlayerIDfromPlayerinfo(playerID, money);
                     } else if (type == 30) { // Client get rank
+                        std::cout << "[OtherServer][Info]: Client request get rank" << std::endl;
                         std::vector<std::vector<std::pair<std::string, int>>> ranks = SqlUtil::getRanksFromPlayerinfo();
                         receivedData.setNormalRank(ranks[0]);
                         receivedData.setWhirlRank(ranks[1]);
                         receivedData.setMultiRank(ranks[2]);
                         sendData(socket, receivedData);
                     } else if (type == 31) {
+                        std::cout << "[OtherServer][Info]: Client request type 31 (Not Implemented)" << std::endl;
                         // TODO
                     } else if (type == 40) { // Client get prop nums
                         std::string playerID = receivedData.getId();
+                        std::cout << "[OtherServer][Info]: Client request get prop nums: " << playerID << std::endl;
                         std::vector<int> propNums = SqlUtil::getPropsFromPlayerinfo(playerID);
                         receivedData.setPropNums(propNums);
                         sendData(socket, receivedData);
                     } else if (type == 41) { // Client set prop nums
                         std::string playerID = receivedData.getId();
                         std::vector<int> propNums = receivedData.getPropNums();
+                        std::cout << "[OtherServer][Info]: Client request set prop nums: " << playerID << std::endl;
                         SqlUtil::setPropsFromPlayerinfo(playerID, propNums);
                     } else if (type == 50) { // Client submit normal mode time
                         std::string playerID = receivedData.getId();
                         int normalTime = receivedData.getNormalTime();
+                        std::cout << "[OtherServer][Info]: Client submit normal mode time: " << playerID << ", " << normalTime << std::endl;
                         SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(playerID, normalTime);
                     } else if (type == 51) { // Client submit whirl mode time
                         // TODO
                         std::string playerID = receivedData.getId();
                         int whirlTime = receivedData.getWhirlTime();
+                        std::cout << "[OtherServer][Info]: Client submit whirl mode time: " << playerID << ", " << whirlTime << std::endl;
                         SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(playerID, whirlTime);
                     }
                 }

@@ -88,6 +88,7 @@ void SqlUtil::testConnection() {
 }
 
 int SqlUtil::authPasswordFromPlayerinfo(std::string playerID, std::string password) {
+    std::cout << "[SqlUtil][Info]: Authenticating user: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -105,24 +106,28 @@ int SqlUtil::authPasswordFromPlayerinfo(std::string playerID, std::string passwo
             
             // If legacy user (no salt/iter), fallback or fail (Assuming all new users)
             if (salt.empty() || iterations == 0) {
+                 std::cout << "[SqlUtil][Info]: Legacy user or missing salt/iterations for: " << playerID << std::endl;
                  return 2; // Treat as fail for security
             }
 
             std::string computedHash = hashPassword(password, salt, iterations);
             
             if (computedHash == dbHash) {
+                std::cout << "[SqlUtil][Info]: Authentication successful for: " << playerID << std::endl;
                 return 1; // Success
             } else {
+                std::cout << "[SqlUtil][Info]: Authentication failed (wrong password) for: " << playerID << std::endl;
                 return 2; // Wrong password
             }
         } else {
+            std::cout << "[SqlUtil][Info]: Authentication failed (user not found): " << playerID << std::endl;
             return 2; // User not found
         }
     } catch (sql::SQLException &e) {
-        std::cerr << "SQLException: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: SQLException in auth: " << e.what() << std::endl;
         return 3;
     } catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in auth: " << e.what() << std::endl;
         return 3;
     }
 }
@@ -294,6 +299,7 @@ void SqlUtil::setIterationsByPlayerIDfromPlayerinfo(std::string playerID, int it
 }
 
 std::vector<int> SqlUtil::getPropsFromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting props for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -307,16 +313,20 @@ std::vector<int> SqlUtil::getPropsFromPlayerinfo(std::string playerID) {
             props.push_back(res->getInt("prop_hammer"));
             props.push_back(res->getInt("prop_resetTable"));
             props.push_back(res->getInt("prop_clearTable"));
+            std::cout << "[SqlUtil][Info]: Props retrieved for " << playerID << ": " 
+                      << props[0] << ", " << props[1] << ", " << props[2] << ", " << props[3] << std::endl;
             return props;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getPropsFromPlayerinfo: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getPropsFromPlayerinfo: " << e.what() << std::endl;
     }
     return {0, 0, 0, 0};
 }
 
 bool SqlUtil::setPropsFromPlayerinfo(std::string playerID, std::vector<int> props) {
     if (props.size() != 4) return false;
+    std::cout << "[SqlUtil][Info]: Setting props for " << playerID << ": " 
+              << props[0] << ", " << props[1] << ", " << props[2] << ", " << props[3] << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -328,14 +338,16 @@ bool SqlUtil::setPropsFromPlayerinfo(std::string playerID, std::vector<int> prop
         pstmt->setInt(4, props[3]);
         pstmt->setString(5, playerID);
         pstmt->executeUpdate();
+        std::cout << "[SqlUtil][Info]: Props updated successfully for " << playerID << std::endl;
         return true;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setPropsFromPlayerinfo: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setPropsFromPlayerinfo: " << e.what() << std::endl;
         return false;
     }
 }
 
 int SqlUtil::getMoneyByPlayerIDfromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting money for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -344,15 +356,18 @@ int SqlUtil::getMoneyByPlayerIDfromPlayerinfo(std::string playerID) {
         pstmt->setString(1, playerID);
         std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
         if (res->next()) {
-            return res->getInt("money");
+            int money = res->getInt("money");
+            std::cout << "[SqlUtil][Info]: Money for " << playerID << ": " << money << std::endl;
+            return money;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getMoney: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getMoney: " << e.what() << std::endl;
     }
     return 0;
 }
 
 void SqlUtil::setMoneyByPlayerIDfromPlayerinfo(std::string playerID, int money) {
+    std::cout << "[SqlUtil][Info]: Setting money for " << playerID << ": " << money << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -361,12 +376,14 @@ void SqlUtil::setMoneyByPlayerIDfromPlayerinfo(std::string playerID, int money) 
         pstmt->setInt(1, money);
         pstmt->setString(2, playerID);
         pstmt->executeUpdate();
+        std::cout << "[SqlUtil][Info]: Money updated successfully for " << playerID << std::endl;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setMoney: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setMoney: " << e.what() << std::endl;
     }
 }
 
 int SqlUtil::getNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting normalSeconds for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -375,15 +392,18 @@ int SqlUtil::getNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
         pstmt->setString(1, playerID);
         std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
         if (res->next()) {
-            return res->getInt("normalSeconds");
+            int seconds = res->getInt("normalSeconds");
+            std::cout << "[SqlUtil][Info]: NormalSeconds for " << playerID << ": " << seconds << std::endl;
+            return seconds;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getNormalSeconds: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getNormalSeconds: " << e.what() << std::endl;
     }
     return 99999;
 }
 
 void SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID, int normalSeconds) {
+    std::cout << "[SqlUtil][Info]: Setting normalSeconds for " << playerID << ": " << normalSeconds << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -392,12 +412,14 @@ void SqlUtil::setNormalSecondsByPlayerIDfromPlayerinfo(std::string playerID, int
         pstmt->setInt(1, normalSeconds);
         pstmt->setString(2, playerID);
         pstmt->executeUpdate();
+        std::cout << "[SqlUtil][Info]: NormalSeconds updated successfully for " << playerID << std::endl;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setNormalSeconds: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setNormalSeconds: " << e.what() << std::endl;
     }
 }
 
 int SqlUtil::getWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting whirlSeconds for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -406,15 +428,18 @@ int SqlUtil::getWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID) {
         pstmt->setString(1, playerID);
         std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
         if (res->next()) {
-            return res->getInt("whirlSeconds");
+            int seconds = res->getInt("whirlSeconds");
+            std::cout << "[SqlUtil][Info]: WhirlSeconds for " << playerID << ": " << seconds << std::endl;
+            return seconds;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getWhirlSeconds: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getWhirlSeconds: " << e.what() << std::endl;
     }
     return 99999;
 }
 
 void SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID, int whirlSeconds) {
+    std::cout << "[SqlUtil][Info]: Setting whirlSeconds for " << playerID << ": " << whirlSeconds << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -423,12 +448,14 @@ void SqlUtil::setWhirlSecondsByPlayerIDfromPlayerinfo(std::string playerID, int 
         pstmt->setInt(1, whirlSeconds);
         pstmt->setString(2, playerID);
         pstmt->executeUpdate();
+        std::cout << "[SqlUtil][Info]: WhirlSeconds updated successfully for " << playerID << std::endl;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setWhirlSeconds: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setWhirlSeconds: " << e.what() << std::endl;
     }
 }
 
 int SqlUtil::getMultiScoreByPlayerIDfromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting multiScore for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -437,15 +464,18 @@ int SqlUtil::getMultiScoreByPlayerIDfromPlayerinfo(std::string playerID) {
         pstmt->setString(1, playerID);
         std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
         if (res->next()) {
-            return res->getInt("multiScore");
+            int score = res->getInt("multiScore");
+            std::cout << "[SqlUtil][Info]: MultiScore for " << playerID << ": " << score << std::endl;
+            return score;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getMultiScore: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getMultiScore: " << e.what() << std::endl;
     }
     return 0;
 }
 
 void SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(std::string playerID, int multiScore) {
+    std::cout << "[SqlUtil][Info]: Setting multiScore for " << playerID << ": " << multiScore << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -454,12 +484,14 @@ void SqlUtil::setMultiScoreByPlayerIDfromPlayerinfo(std::string playerID, int mu
         pstmt->setInt(1, multiScore);
         pstmt->setString(2, playerID);
         pstmt->executeUpdate();
+        std::cout << "[SqlUtil][Info]: MultiScore updated successfully for " << playerID << std::endl;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setMultiScore: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setMultiScore: " << e.what() << std::endl;
     }
 }
 
 std::string SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(std::string playerID) {
+    std::cout << "[SqlUtil][Info]: Getting achievementStr for: " << playerID << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
@@ -468,29 +500,74 @@ std::string SqlUtil::getAchievementStrByPlayerIDfromPlayerinfo(std::string playe
         pstmt->setString(1, playerID);
         std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
         if (res->next()) {
-            return res->getString("achievementStr");
+            std::string achStr = res->getString("achievementStr");
+            std::cout << "[SqlUtil][Info]: AchievementStr for " << playerID << ": " << achStr << std::endl;
+            return achStr;
         }
     } catch (std::exception &e) {
-        std::cerr << "Exception in getAchievementStr: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getAchievementStr: " << e.what() << std::endl;
     }
     return "0000000000";
 }
 
 void SqlUtil::setAchievementStrByPlayerIDfromPlayerinfo(std::string playerID, std::string achievementStr) {
+    std::cout << "[SqlUtil][Info]: Setting achievementStr for " << playerID << ": " << achievementStr << std::endl;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         std::unique_ptr<sql::Connection> conn(driver->connect(Config::sqlIP + ":" + std::to_string(Config::sqlPort), Config::sqlUsername, Config::sqlPassword));
         conn->setSchema("bejeweled");
-        std::unique_ptr<sql::PreparedStatement> pstmt(conn->prepareStatement("UPDATE playerinfo SET achievementStr = ? WHERE playerID = ?"));
-        pstmt->setString(1, achievementStr);
-        pstmt->setString(2, playerID);
-        pstmt->executeUpdate();
+
+        // 1. Get current achievement string
+        std::unique_ptr<sql::PreparedStatement> pstmtGet(conn->prepareStatement("SELECT achievementStr FROM playerinfo WHERE playerID = ?"));
+        pstmtGet->setString(1, playerID);
+        std::unique_ptr<sql::ResultSet> res(pstmtGet->executeQuery());
+        
+        std::string currentAch = "0000000000";
+        if (res->next()) {
+            currentAch = res->getString("achievementStr");
+        }
+
+        // Ensure length is 10
+        if (currentAch.length() != 10) currentAch = "0000000000";
+        if (achievementStr.length() != 10) achievementStr = "0000000000";
+
+        // 2. Perform OR operation
+        std::string finalAch = "0000000000";
+        for (int i = 0; i < 10; ++i) {
+            if (currentAch[i] == '1' || achievementStr[i] == '1') {
+                finalAch[i] = '1';
+            } else {
+                finalAch[i] = '0';
+            }
+        }
+
+        // 3. Check first 9 bits
+        bool firstNineAllOne = true;
+        for (int i = 0; i < 9; ++i) {
+            if (finalAch[i] != '1') {
+                firstNineAllOne = false;
+                break;
+            }
+        }
+
+        // 4. Set 10th bit if condition met
+        if (firstNineAllOne) {
+            finalAch[9] = '1';
+        }
+
+        // 5. Update database
+        std::unique_ptr<sql::PreparedStatement> pstmtUpdate(conn->prepareStatement("UPDATE playerinfo SET achievementStr = ? WHERE playerID = ?"));
+        pstmtUpdate->setString(1, finalAch);
+        pstmtUpdate->setString(2, playerID);
+        pstmtUpdate->executeUpdate();
+        std::cout << "[SqlUtil][Info]: AchievementStr updated successfully for " << playerID << " to " << finalAch << std::endl;
     } catch (std::exception &e) {
-        std::cerr << "Exception in setAchievementStr: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in setAchievementStr: " << e.what() << std::endl;
     }
 }
 
 std::vector<std::vector<std::pair<std::string, int>>> SqlUtil::getRanksFromPlayerinfo() {
+    std::cout << "[SqlUtil][Info]: Getting ranks from playerinfo" << std::endl;
     std::vector<std::vector<std::pair<std::string, int>>> ranks;
     try {
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
@@ -512,7 +589,7 @@ std::vector<std::vector<std::pair<std::string, int>>> SqlUtil::getRanksFromPlaye
         {
             std::vector<std::pair<std::string, int>> whirlRank;
             std::unique_ptr<sql::Statement> stmt(conn->createStatement());
-            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT playerID, whirlSeconds FROM playerinfo ORDER BY whirlSeconds ASC LIMIT 10"));
+            std::unique_ptr<sql::ResultSet> res(stmt->executeQuery("SELECT playerID, whirlSeconds FROM playerinfo ORDER BY whirlSeconds DESC LIMIT 10"));
             while (res->next()) {
                 whirlRank.push_back({res->getString("playerID"), res->getInt("whirlSeconds")});
             }
@@ -530,10 +607,11 @@ std::vector<std::vector<std::pair<std::string, int>>> SqlUtil::getRanksFromPlaye
             ranks.push_back(multiRank);
         }
 
+        std::cout << "[SqlUtil][Info]: Ranks retrieved successfully" << std::endl;
         return ranks;
 
     } catch (std::exception &e) {
-        std::cerr << "Exception in getRanksFromPlayerinfo: " << e.what() << std::endl;
+        std::cerr << "[SqlUtil][Error]: Exception in getRanksFromPlayerinfo: " << e.what() << std::endl;
         return {};
     }
 }

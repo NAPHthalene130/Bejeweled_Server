@@ -7,17 +7,23 @@
 using json = nlohmann::json;
 
 AuthServer::AuthServer(unsigned short port)
-    : acceptor(ioContext, tcp::endpoint(tcp::v4(), port)) {
+    : acceptor(ioContext) {
     // Generate RSA keys on startup
     generateKeys();
 
     // Test DB connection
     SqlUtil::testConnection();
 
-    // Set socket reuse address option
+    // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v6(), port);
+    acceptor.open(endpoint.protocol());
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+    acceptor.set_option(boost::asio::ip::v6_only(false));
+    acceptor.bind(endpoint);
+    acceptor.listen();
+    
     startAccept();
-    std::cout << "[AuthServer][Info]: Listening on port " << port << std::endl;
+    std::cout << "[AuthServer][Info]: Listening on port " << port << " (IPv4/IPv6)" << std::endl;
 }
 
 AuthServer::~AuthServer() {

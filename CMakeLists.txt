@@ -38,11 +38,7 @@ add_executable(Bejeweled_Server ${SOURCES})
 
 # Link libraries
 # Boost
-if(TARGET Boost::headers)
-    target_link_libraries(Bejeweled_Server PRIVATE Boost::headers)
-else()
-    target_link_libraries(Bejeweled_Server PRIVATE Boost::boost)
-endif()
+target_link_libraries(Bejeweled_Server PRIVATE Boost::asio Boost::system Boost::bind Boost::date_time)
 
 # OpenSSL
 target_link_libraries(Bejeweled_Server PRIVATE OpenSSL::SSL OpenSSL::Crypto)
@@ -51,12 +47,9 @@ target_link_libraries(Bejeweled_Server PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(Bejeweled_Server PRIVATE nlohmann_json::nlohmann_json)
 
 # MySQL
-# Link both X DevAPI (connector) and JDBC (connector-jdbc)
+# Link JDBC (connector-jdbc)
 if(TARGET unofficial::mysql-connector-cpp::connector-jdbc)
     target_link_libraries(Bejeweled_Server PRIVATE unofficial::mysql-connector-cpp::connector-jdbc)
-endif()
-if(TARGET unofficial::mysql-connector-cpp::connector)
-    target_link_libraries(Bejeweled_Server PRIVATE unofficial::mysql-connector-cpp::connector)
 endif()
 
 # Windows system libraries

@@ -1,0 +1,875 @@
+azureuser@ForNaph:~/Bejeweled_Server$ docker build -t bejeweled-server:latest .
+[+] Building 3215.5s (12/17)                                                   docker:default
+[+] Building 3217.9s (12/17)                                                   docker:default
+[+] Building 23205.0s (15/17)                                                  docker:default
+ => [internal] load build definition from Dockerfile                                     0.1s
+ => => transferring dockerfile: 1.99kB                                                   0.1s
+ => [internal] load metadata for docker.io/library/ubuntu:22.04                          1.8s
+ => [internal] load .dockerignore                                                        0.0s
+ => => transferring context: 309B                                                        0.0s
+ => [internal] load build context                                                        0.0s
+ => => transferring context: 4.07kB                                                      0.0s
+ => CACHED [builder 1/9] FROM docker.io/library/ubuntu:22.04@sha256:104ae83764a5119017b  0.0s
+ => CACHED [stage-1 2/5] RUN apt-get update && apt-get install -y     ca-certificates    0.0s
+ => CACHED [stage-1 3/5] WORKDIR /app                                                    0.0s
+ => [builder 2/9] RUN apt-get update && apt-get install -y     build-essential     cma  68.0s
+ => [builder 3/9] WORKDIR /opt                                                           0.3s
+ => [builder 4/9] RUN git clone https://github.com/microsoft/vcpkg.git &&     ./vcpkg/  26.0s
+ => [builder 5/9] WORKDIR /app                                                           0.1s
+ => [builder 6/9] COPY vcpkg.json .                                                      0.1s
+ => [builder 7/9] RUN /opt/vcpkg/vcpkg install --triplet x64-linux --allow-unsuppor  22772.3s
+ => [builder 8/9] COPY . .                                                               1.6s
+ => ERROR [builder 9/9] RUN mkdir -p build && cd build &&     cmake ..     -DCMAKE_TO  328.2s
+------
+ > [builder 9/9] RUN mkdir -p build && cd build &&     cmake ..     -DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake     -DCMAKE_BUILD_TYPE=Release     -DVCPKG_TARGET_TRIPLET=x64-linux     &&     make -j$(nproc):
+7.824 -- Running vcpkg install
+7.963 Loading dependency information for 167 packages...
+8.622 Detecting compiler hash for triplet x64-linux...
+11.00 Compiler found: /usr/bin/c++
+12.34 The following packages will be built and installed:
+12.34   * abseil:x64-linux@20250814.1
+12.34     boost:x64-linux@1.90.0
+12.34   * boost-accumulators:x64-linux@1.90.0
+12.34   * boost-algorithm:x64-linux@1.90.0
+12.34   * boost-align:x64-linux@1.90.0
+12.34   * boost-any:x64-linux@1.90.0
+12.34   * boost-array:x64-linux@1.90.0
+12.34   * boost-asio[core,deadline-timer,spawn]:x64-linux@1.90.0
+12.34   * boost-assert:x64-linux@1.90.0
+12.34   * boost-assign:x64-linux@1.90.0
+12.34   * boost-atomic:x64-linux@1.90.0
+12.34   * boost-beast:x64-linux@1.90.0
+12.34   * boost-bimap:x64-linux@1.90.0
+12.34   * boost-bind:x64-linux@1.90.0
+12.34   * boost-bloom:x64-linux@1.90.0
+12.34   * boost-callable-traits:x64-linux@1.90.0
+12.34   * boost-charconv:x64-linux@1.90.0
+12.34   * boost-chrono:x64-linux@1.90.0
+12.34   * boost-circular-buffer:x64-linux@1.90.0
+12.34   * boost-cmake:x64-linux@1.90.0
+12.34   * boost-cobalt:x64-linux@1.90.0
+12.34   * boost-compat:x64-linux@1.90.0
+12.34   * boost-compute:x64-linux@1.90.0
+12.34   * boost-concept-check:x64-linux@1.90.0
+12.34   * boost-config:x64-linux@1.90.0
+12.34   * boost-container:x64-linux@1.90.0
+12.34   * boost-container-hash:x64-linux@1.90.0
+12.34   * boost-context:x64-linux@1.90.0
+12.34   * boost-contract:x64-linux@1.90.0
+12.34   * boost-conversion:x64-linux@1.90.0
+12.34   * boost-convert:x64-linux@1.90.0
+12.34   * boost-core:x64-linux@1.90.0
+12.34   * boost-coroutine:x64-linux@1.90.0
+12.34   * boost-coroutine2:x64-linux@1.90.0
+12.34   * boost-crc:x64-linux@1.90.0
+12.34   * boost-date-time:x64-linux@1.90.0
+12.34   * boost-describe:x64-linux@1.90.0
+12.34   * boost-detail:x64-linux@1.90.0
+12.34   * boost-dll:x64-linux@1.90.0
+12.34   * boost-dynamic-bitset:x64-linux@1.90.0
+12.34   * boost-endian:x64-linux@1.90.0
+12.34   * boost-exception:x64-linux@1.90.0
+12.34   * boost-fiber:x64-linux@1.90.0
+12.34   * boost-filesystem:x64-linux@1.90.0
+12.34   * boost-flyweight:x64-linux@1.90.0
+12.34   * boost-foreach:x64-linux@1.90.0
+12.34   * boost-format:x64-linux@1.90.0
+12.34   * boost-function:x64-linux@1.90.0
+12.34   * boost-function-types:x64-linux@1.90.0
+12.34   * boost-functional:x64-linux@1.90.0
+12.34   * boost-fusion:x64-linux@1.90.0
+12.34   * boost-geometry:x64-linux@1.90.0
+12.34   * boost-gil:x64-linux@1.90.0
+12.34   * boost-graph:x64-linux@1.90.0
+12.34   * boost-hana:x64-linux@1.90.0
+12.34   * boost-hash2:x64-linux@1.90.0
+12.34   * boost-headers:x64-linux@1.90.0
+12.34   * boost-heap:x64-linux@1.90.0
+12.34   * boost-histogram:x64-linux@1.90.0
+12.34   * boost-hof:x64-linux@1.90.0
+12.34   * boost-icl:x64-linux@1.90.0
+12.34   * boost-integer:x64-linux@1.90.0
+12.34   * boost-interprocess:x64-linux@1.90.0
+12.34   * boost-interval:x64-linux@1.90.0
+12.34   * boost-intrusive:x64-linux@1.90.0
+12.34   * boost-io:x64-linux@1.90.0
+12.34   * boost-iostreams[bzip2,core,lzma,zlib,zstd]:x64-linux@1.90.0
+12.34   * boost-iterator:x64-linux@1.90.0
+12.34   * boost-json:x64-linux@1.90.0
+12.34   * boost-lambda:x64-linux@1.90.0
+12.34   * boost-lambda2:x64-linux@1.90.0
+12.34   * boost-leaf:x64-linux@1.90.0
+12.34   * boost-lexical-cast:x64-linux@1.90.0
+12.34   * boost-local-function:x64-linux@1.90.0
+12.34   * boost-locale:x64-linux@1.90.0
+12.34   * boost-lockfree:x64-linux@1.90.0
+12.34   * boost-log:x64-linux@1.90.0
+12.34   * boost-logic:x64-linux@1.90.0
+12.34   * boost-math:x64-linux@1.90.0
+12.34   * boost-metaparse:x64-linux@1.90.0
+12.34   * boost-move:x64-linux@1.90.0
+12.34   * boost-mp11:x64-linux@1.90.0
+12.34   * boost-mpl:x64-linux@1.90.0
+12.34   * boost-mqtt5:x64-linux@1.90.0
+12.34   * boost-msm:x64-linux@1.90.0
+12.34   * boost-multi-array:x64-linux@1.90.0
+12.34   * boost-multi-index:x64-linux@1.90.0
+12.34   * boost-multiprecision:x64-linux@1.90.0
+12.34   * boost-mysql:x64-linux@1.90.0
+12.34   * boost-nowide:x64-linux@1.90.0
+12.34   * boost-numeric-conversion:x64-linux@1.90.0
+12.34   * boost-odeint:x64-linux@1.90.0
+12.34   * boost-openmethod:x64-linux@1.90.0
+12.34   * boost-optional:x64-linux@1.90.0
+12.34   * boost-outcome:x64-linux@1.90.0
+12.34   * boost-parameter:x64-linux@1.90.0
+12.34   * boost-parameter-python:x64-linux@1.90.0
+12.34   * boost-parser:x64-linux@1.90.0
+12.34   * boost-pfr:x64-linux@1.90.0
+12.34   * boost-phoenix:x64-linux@1.90.0
+12.34   * boost-poly-collection:x64-linux@1.90.0
+12.34   * boost-polygon:x64-linux@1.90.0
+12.34   * boost-pool:x64-linux@1.90.0
+12.34   * boost-predef:x64-linux@1.90.0
+12.34   * boost-preprocessor:x64-linux@1.90.0
+12.34   * boost-process:x64-linux@1.90.0
+12.34   * boost-program-options:x64-linux@1.90.0
+12.34   * boost-property-map:x64-linux@1.90.0
+12.34   * boost-property-tree:x64-linux@1.90.0
+12.34   * boost-proto:x64-linux@1.90.0
+12.34   * boost-ptr-container:x64-linux@1.90.0
+12.34   * boost-python:x64-linux@1.90.0
+12.34   * boost-qvm:x64-linux@1.90.0
+12.34   * boost-random:x64-linux@1.90.0
+12.34   * boost-range:x64-linux@1.90.0
+12.34   * boost-ratio:x64-linux@1.90.0
+12.34   * boost-rational:x64-linux@1.90.0
+12.34   * boost-redis:x64-linux@1.90.0
+12.34   * boost-regex:x64-linux@1.90.0
+12.34   * boost-safe-numerics:x64-linux@1.90.0
+12.34   * boost-scope:x64-linux@1.90.0
+12.34   * boost-scope-exit:x64-linux@1.90.0
+12.34   * boost-serialization:x64-linux@1.90.0
+12.34   * boost-signals2:x64-linux@1.90.0
+12.34   * boost-smart-ptr:x64-linux@1.90.0
+12.34   * boost-sort:x64-linux@1.90.0
+12.34   * boost-spirit:x64-linux@1.90.0
+12.34   * boost-stacktrace[backtrace,core]:x64-linux@1.90.0
+12.34   * boost-statechart:x64-linux@1.90.0
+12.34   * boost-static-assert:x64-linux@1.90.0
+12.34   * boost-static-string:x64-linux@1.90.0
+12.34   * boost-stl-interfaces:x64-linux@1.90.0
+12.34   * boost-system:x64-linux@1.90.0
+12.34   * boost-test:x64-linux@1.90.0
+12.34   * boost-thread:x64-linux@1.90.0
+12.34   * boost-throw-exception:x64-linux@1.90.0
+12.34   * boost-timer:x64-linux@1.90.0
+12.34   * boost-tokenizer:x64-linux@1.90.0
+12.34   * boost-tti:x64-linux@1.90.0
+12.34   * boost-tuple:x64-linux@1.90.0
+12.34   * boost-type-erasure:x64-linux@1.90.0
+12.34   * boost-type-index:x64-linux@1.90.0
+12.34   * boost-type-traits:x64-linux@1.90.0
+12.34   * boost-typeof:x64-linux@1.90.0
+12.34   * boost-ublas:x64-linux@1.90.0
+12.34   * boost-uninstall:x64-linux@1.90.0
+12.34   * boost-units:x64-linux@1.90.0
+12.34   * boost-unordered:x64-linux@1.90.0
+12.34   * boost-url:x64-linux@1.90.0
+12.34   * boost-utility:x64-linux@1.90.0
+12.34   * boost-uuid:x64-linux@1.90.0
+12.34   * boost-variant:x64-linux@1.90.0
+12.34   * boost-variant2:x64-linux@1.90.0
+12.34   * boost-vmd:x64-linux@1.90.0
+12.34   * boost-wave:x64-linux@1.90.0
+12.34   * boost-winapi:x64-linux@1.90.0
+12.34   * boost-xpressive:x64-linux@1.90.0
+12.34   * boost-yap:x64-linux@1.90.0
+12.34   * bzip2[core,tool]:x64-linux@1.0.8#6
+12.34   * expat:x64-linux@2.7.3
+12.34   * gettext-libintl:x64-linux@0.22.5#4
+12.34   * libbacktrace:x64-linux@2024-11-30
+12.34   * libffi:x64-linux@3.5.2
+12.34   * libiconv:x64-linux@1.18#3
+12.34   * liblzma:x64-linux@5.8.2
+12.34   * libmysql:x64-linux@8.0.40#1
+12.34   * libuuid:x64-linux@1.0.3#15
+12.34   * lz4:x64-linux@1.10.0
+12.34     mysql-connector-cpp[core,jdbc]:x64-linux@9.1.0#4
+12.34   * ncurses:x64-linux@6.5#1
+12.34     nlohmann-json:x64-linux@3.12.0#1
+12.34     openssl:x64-linux@3.6.0#3
+12.34   * protobuf:x64-linux@5.29.5#3
+12.34   * python3[core,extensions]:x64-linux@3.12.9#7
+12.34   * rapidjson:x64-linux@2025-02-26
+12.34   * sqlite3[core,json1]:x64-linux@3.51.1
+12.34   * utf8-range:x64-linux@5.29.5
+12.34   * vcpkg-boost:x64-linux@2025-03-29
+12.34   * vcpkg-cmake:x64-linux@2024-04-23
+12.34   * vcpkg-cmake-config:x64-linux@2024-05-23
+12.34   * vcpkg-cmake-get-vars:x64-linux@2025-05-29
+12.34   * vcpkg-get-python:x64-linux@2025-02-09
+12.34   * vcpkg-make:x64-linux@2025-10-26
+12.34   * zlib:x64-linux@1.3.1
+12.34   * zstd:x64-linux@1.5.7
+12.34 Additional packages (*) will be modified to complete this operation.
+97.99 Restored 185 package(s) from /root/.cache/vcpkg/archives in 1.1 min. Use --debug to see more details.
+97.99 Installing 1/185 vcpkg-cmake-config:x64-linux@2024-05-23...
+98.00 Elapsed time to handle vcpkg-cmake-config:x64-linux: 1.67 ms
+98.00 vcpkg-cmake-config:x64-linux package ABI: 114ff44b3ad7707cd17290ade2c0bf35d92705450cac58d3039748f07cfe4658
+98.00 Installing 2/185 vcpkg-cmake:x64-linux@2024-04-23...
+98.00 Elapsed time to handle vcpkg-cmake:x64-linux: 9.23 ms
+98.00 vcpkg-cmake:x64-linux package ABI: 528a87ad71eea7b9cf81b5bf49365be3e56b2ead185b8022d9df2c5dca8881bd
+98.00 Installing 3/185 vcpkg-boost:x64-linux@2025-03-29...
+98.01 Elapsed time to handle vcpkg-boost:x64-linux: 8.55 ms
+98.01 vcpkg-boost:x64-linux package ABI: 852b86fab3ed26e266f5281a86f6aff74ec341aec4b3dfb137ac195eedda231b
+98.01 Installing 4/185 boost-uninstall:x64-linux@1.90.0...
+98.01 Elapsed time to handle boost-uninstall:x64-linux: 1.17 ms
+98.01 boost-uninstall:x64-linux package ABI: 12c632099cdda0598491cbb133c68e4cdfe4b40c517ad9c2600b1773165c5226
+98.01 Installing 5/185 boost-cmake:x64-linux@1.90.0...
+98.02 Elapsed time to handle boost-cmake:x64-linux: 8.8 ms
+98.02 boost-cmake:x64-linux package ABI: 7809a6205ff107393d1b9c1f30f62d090a01bcd7da17af835e76e7a2d5f6aa93
+98.02 Installing 6/185 boost-headers:x64-linux@1.90.0...
+98.02 Elapsed time to handle boost-headers:x64-linux: 1.21 ms
+98.02 boost-headers:x64-linux package ABI: 25632430b8a9ca19d08162416344c14f53a7bfddf187c0061da74ec6d753b5e1
+98.02 Installing 7/185 boost-config:x64-linux@1.90.0...
+98.09 Elapsed time to handle boost-config:x64-linux: 66.4 ms
+98.09 boost-config:x64-linux package ABI: c21f9584173445fba32aeed005b9bb37c393d12f60f1c6a35f3f3f68cb02ea17
+98.09 Installing 8/185 boost-assert:x64-linux@1.90.0...
+98.10 Elapsed time to handle boost-assert:x64-linux: 10.2 ms
+98.10 boost-assert:x64-linux package ABI: a7f35c758879e23424102a004c95581c8d6f8c3d191464be9c32a2925d328dde
+98.10 Installing 9/185 boost-throw-exception:x64-linux@1.90.0...
+98.13 Elapsed time to handle boost-throw-exception:x64-linux: 10.3 ms
+98.13 boost-throw-exception:x64-linux package ABI: 2414ee79877afac669c1b50e20079e90f9993f922e7c4264e8a10f28b0e9a444
+98.13 Installing 10/185 boost-mp11:x64-linux@1.90.0...
+98.18 Elapsed time to handle boost-mp11:x64-linux: 47.9 ms
+98.18 boost-mp11:x64-linux package ABI: 6bb9be90e7d2f6346431af7d4bb92001a484ef394cd5ab0c5031c7c2537a4679
+98.18 Installing 11/185 boost-describe:x64-linux@1.90.0...
+98.18 Elapsed time to handle boost-describe:x64-linux: 19 ms
+98.18 boost-describe:x64-linux package ABI: 49e6068fd8fe40c3ed1241cbf56a2c69a3f8cea5de77f2da2f77d27fd7c05fbe
+98.18 Installing 12/185 boost-container-hash:x64-linux@1.90.0...
+98.20 Elapsed time to handle boost-container-hash:x64-linux: 19.3 ms
+98.20 boost-container-hash:x64-linux package ABI: df5bbbb624fede11bb60988134449e450415f5f8bd5e87dc07d29a25f2fab492
+98.20 Installing 13/185 boost-type-index:x64-linux@1.90.0...
+98.21 Elapsed time to handle boost-type-index:x64-linux: 10.1 ms
+98.21 boost-type-index:x64-linux package ABI: 166b0369387e4c56d550787bcbb0f5bad17408f4bec604d5731c83d2b42e9704
+98.21 Installing 14/185 boost-preprocessor:x64-linux@1.90.0...
+98.32 Elapsed time to handle boost-preprocessor:x64-linux: 109 ms
+98.32 boost-preprocessor:x64-linux package ABI: 99b1b74b1be35bf052ed156199b28bf30249baf492773e50c08d8471c1de9d2a
+98.32 Installing 15/185 boost-static-assert:x64-linux@1.90.0...
+98.34 Elapsed time to handle boost-static-assert:x64-linux: 24.2 ms
+98.34 boost-static-assert:x64-linux package ABI: 355bd86a47f5e8be65ee623e264cad3849d53602b572bea3db1d0b33bb477858
+98.34 Installing 16/185 boost-type-traits:x64-linux@1.90.0...
+98.39 Elapsed time to handle boost-type-traits:x64-linux: 53.2 ms
+98.39 boost-type-traits:x64-linux package ABI: b554fde2b5e12ff028c0d5c2b2f2c125947520ede853e972f7182311c0366ce4
+98.39 Installing 17/185 boost-core:x64-linux@1.90.0...
+98.42 Elapsed time to handle boost-core:x64-linux: 24.6 ms
+98.42 boost-core:x64-linux package ABI: 8a9efcf27b704c0297242c3eddcf80cfbd830ca7def94f440f554e52da808321
+98.42 Installing 18/185 boost-tuple:x64-linux@1.90.0...
+98.43 Elapsed time to handle boost-tuple:x64-linux: 14.5 ms
+98.43 boost-tuple:x64-linux package ABI: 60043d92aa3ae466911488f1bda1fab9affb049494c2f45d01699d7f92ec4725
+98.43 Installing 19/185 boost-io:x64-linux@1.90.0...
+98.45 Elapsed time to handle boost-io:x64-linux: 20.7 ms
+98.45 boost-io:x64-linux package ABI: ccfcec078b3234eb013c965799753d4e059cdf3639f41d936d98fd211e2dba17
+98.45 Installing 20/185 boost-utility:x64-linux@1.90.0...
+98.47 Elapsed time to handle boost-utility:x64-linux: 14.6 ms
+98.47 boost-utility:x64-linux package ABI: 40ad405bdbaf14d5a92642bedbe1a084ef01c1125302ed045431d7b89b8aac7e
+98.47 Installing 21/185 boost-predef:x64-linux@1.90.0...
+98.51 Elapsed time to handle boost-predef:x64-linux: 40.6 ms
+98.51 boost-predef:x64-linux package ABI: bbcea3dc837487c33efb433dcaad3f1ebedcf4536e62fa47426388b918468d1d
+98.51 Installing 22/185 boost-mpl:x64-linux@1.90.0...
+98.74 Elapsed time to handle boost-mpl:x64-linux: 224 ms
+98.74 boost-mpl:x64-linux package ABI: 31882c8d2ddf0f3d3a5ab52dd3033eb6cbf7b2e715963c8fadcac0c558ffaf64
+98.74 Installing 23/185 boost-typeof:x64-linux@1.90.0...
+98.77 Elapsed time to handle boost-typeof:x64-linux: 37.9 ms
+98.77 boost-typeof:x64-linux package ABI: bb3cfa746aa7f512cffcf786e0c6adcd032cc18f33f028f684d79cbb107a121d
+98.77 Installing 24/185 boost-detail:x64-linux@1.90.0...
+98.81 Elapsed time to handle boost-detail:x64-linux: 28.8 ms
+98.81 boost-detail:x64-linux package ABI: 9dc7ce1530c29aa19fd8f33bd58ff5fd5b9a3a73975daf804e3d07ed7d313867
+98.81 Installing 25/185 boost-function-types:x64-linux@1.90.0...
+98.84 Elapsed time to handle boost-function-types:x64-linux: 40.6 ms
+98.84 boost-function-types:x64-linux package ABI: 0fa6c30d42f719b4677a2ea2d5724187a2d40b033da0f7998f172e4fdfafaaef
+98.84 Installing 26/185 boost-bind:x64-linux@1.90.0...
+98.87 Elapsed time to handle boost-bind:x64-linux: 33.6 ms
+98.87 boost-bind:x64-linux package ABI: 69a9d1728658943149ac5b26bdda13029794bbe2460c385a266ad1e3302571af
+98.87 Installing 27/185 boost-function:x64-linux@1.90.0...
+98.90 Elapsed time to handle boost-function:x64-linux: 29.7 ms
+98.90 boost-function:x64-linux package ABI: 8aafe6e8a0053d68cc9393cf750e1e92a1cd1f4922d424899e515e6c33df186e
+98.90 Installing 28/185 boost-functional:x64-linux@1.90.0...
+98.93 Elapsed time to handle boost-functional:x64-linux: 27.9 ms
+98.93 boost-functional:x64-linux package ABI: b30755a88199846f4471e43a943267660da94593edf37f0596be0dfed2e58a62
+98.93 Installing 29/185 boost-fusion:x64-linux@1.90.0...
+99.21 Elapsed time to handle boost-fusion:x64-linux: 272 ms
+99.21 boost-fusion:x64-linux package ABI: 8c9fd5d36445a020b96abf284fcce38a1d3d70502865472197b7fef9f04345a3
+99.21 Installing 30/185 boost-hana:x64-linux@1.90.0...
+99.33 Elapsed time to handle boost-hana:x64-linux: 123 ms
+99.33 boost-hana:x64-linux package ABI: 417653da12257447b7d6e2e92cb2ade565fa4201e37bb622635d5cc1bb1352e9
+99.33 Installing 31/185 boost-yap:x64-linux@1.90.0...
+99.37 Elapsed time to handle boost-yap:x64-linux: 37.2 ms
+99.37 boost-yap:x64-linux package ABI: 447f857dd69d27fc822597868aa79668045c753bb395d669178188af2023a072
+99.37 Installing 32/185 boost-integer:x64-linux@1.90.0...
+99.40 Elapsed time to handle boost-integer:x64-linux: 32.8 ms
+99.40 boost-integer:x64-linux package ABI: 7ef3791edfad44fe2ea6c4d0fd357bbfa1557be0d75e015e2f94bf615b0d4243
+99.40 Installing 33/185 boost-variant:x64-linux@1.90.0...
+99.44 Elapsed time to handle boost-variant:x64-linux: 41.8 ms
+99.44 boost-variant:x64-linux package ABI: eb7ba71c7c43944f34b458a7105b6ba8709b7857932030fad93ea1ec3e1e5af9
+99.44 Installing 34/185 boost-unordered:x64-linux@1.90.0...
+99.49 Elapsed time to handle boost-unordered:x64-linux: 46.8 ms
+99.49 boost-unordered:x64-linux package ABI: aaf22edc8e226efc73dc0d3674c86515d96b379dd17ed1f8520f1e17e1804554
+99.49 Installing 35/185 boost-winapi:x64-linux@1.90.0...
+99.54 Elapsed time to handle boost-winapi:x64-linux: 49.5 ms
+99.54 boost-winapi:x64-linux package ABI: 19ab38c57ccd76eba9eb781b4e76eb0ca8a09a5a34679f20bcfec664d5d1cf68
+99.54 Installing 36/185 boost-variant2:x64-linux@1.90.0...
+99.57 Elapsed time to handle boost-variant2:x64-linux: 38 ms
+99.57 boost-variant2:x64-linux package ABI: 6c295157e7f63a45b20e7ff92a5f1cf0531f1f4125ee0b65a0c751cb5a946dad
+99.57 Installing 37/185 boost-system:x64-linux@1.90.0...
+99.62 Elapsed time to handle boost-system:x64-linux: 46.8 ms
+99.62 boost-system:x64-linux package ABI: b676cd02b23c812450f95120b946a927665b54a22a1eb2dc7caf15f608112831
+99.62 Installing 38/185 boost-smart-ptr:x64-linux@1.90.0...
+99.67 Elapsed time to handle boost-smart-ptr:x64-linux: 39.9 ms
+99.67 boost-smart-ptr:x64-linux package ABI: 4804930bae601a4b7f0afec1e29dbde66eecce560746e45f9ac685b5cc999a0c
+99.67 Installing 39/185 boost-optional:x64-linux@1.90.0...
+99.71 Elapsed time to handle boost-optional:x64-linux: 46.9 ms
+99.71 boost-optional:x64-linux package ABI: e4ce7d5bcced45c7251649877f4dda868248889ea1e0bc47efa13af8fcd54787
+99.71 Installing 40/185 boost-move:x64-linux@1.90.0...
+99.76 Elapsed time to handle boost-move:x64-linux: 49.1 ms
+99.76 boost-move:x64-linux package ABI: 8205bcd1f33932a8e88cffcb3eb18488d4f0ae78f9bf915a778768c3fb340629
+99.76 Installing 41/185 boost-exception:x64-linux@1.90.0...
+99.79 Elapsed time to handle boost-exception:x64-linux: 38.1 ms
+99.79 boost-exception:x64-linux package ABI: 4b0e14b017c85562704a10e76219081571000f6bf8553540e655078edb760859
+99.79 Installing 42/185 boost-concept-check:x64-linux@1.90.0...
+99.84 Elapsed time to handle boost-concept-check:x64-linux: 44.9 ms
+99.84 boost-concept-check:x64-linux package ABI: 47018af55a03f3551bbe65719d4f6ad5aabb5947cb9efd9a2620f078bd3982b1
+99.84 Installing 43/185 boost-iterator:x64-linux@1.90.0...
+99.89 Elapsed time to handle boost-iterator:x64-linux: 47.6 ms
+99.89 boost-iterator:x64-linux package ABI: 362f7c3d717ee281e2f73fc1cf38270fd67ac9e6b1bc7b66a3fc4bf11406e627
+99.89 Installing 44/185 boost-tokenizer:x64-linux@1.90.0...
+99.92 Elapsed time to handle boost-tokenizer:x64-linux: 36.8 ms
+99.92 boost-tokenizer:x64-linux package ABI: 38b0f6a4ed0c5d36783da2ad5a8ca0c2813d8ec75b07e814da56c42d4eb5a5ef
+99.92 Installing 45/185 boost-regex:x64-linux@1.90.0...
+99.97 Elapsed time to handle boost-regex:x64-linux: 46.2 ms
+99.97 boost-regex:x64-linux package ABI: 2478b6fc9f76fe22eafaa4b5a2f9120edac13f1485209913052bbe73c6ede3dd
+99.97 Installing 46/185 boost-conversion:x64-linux@1.90.0...
+100.0 Elapsed time to handle boost-conversion:x64-linux: 52.4 ms
+100.0 boost-conversion:x64-linux package ABI: 9db37ce12fccb6f9b02b0e883d096c1358229f035694b57c9d1ff5862bb59bad
+100.0 Installing 47/185 boost-array:x64-linux@1.90.0...
+100.1 Elapsed time to handle boost-array:x64-linux: 66.1 ms
+100.1 boost-array:x64-linux package ABI: a1e10162001edadb4f1efdd7e8a35044f6e0da08e2b6534b1489f5d9f15b16ff
+100.1 Installing 48/185 boost-range:x64-linux@1.90.0...
+100.2 Elapsed time to handle boost-range:x64-linux: 75.4 ms
+100.2 boost-range:x64-linux package ABI: 557dc5d39cdb1e691f08d2cb1d0f33c82114a2e74d3838ebf6d963bc48e8e1b7
+100.2 Installing 49/185 boost-numeric-conversion:x64-linux@1.90.0...
+100.2 Elapsed time to handle boost-numeric-conversion:x64-linux: 46.6 ms
+100.2 boost-numeric-conversion:x64-linux package ABI: f593f46d0dcabb48ed6d120a3a1f730a4f2b9a49f91c46bc26f33c399fc1df1b
+100.2 Installing 50/185 boost-intrusive:x64-linux@1.90.0...
+100.3 Elapsed time to handle boost-intrusive:x64-linux: 49.8 ms
+100.3 boost-intrusive:x64-linux package ABI: cc1182072d6f1615b0d96ce46ac432e2fdea8acf6e61a5e3414a1fc656c20138
+100.3 Installing 51/185 boost-container:x64-linux@1.90.0...
+100.3 Elapsed time to handle boost-container:x64-linux: 76.6 ms
+100.3 boost-container:x64-linux package ABI: 07413d51ac19967be7c98ac50f963dceb311a85a699cbfc515c586cc76b8a8e0
+100.3 Installing 52/185 boost-lexical-cast:x64-linux@1.90.0...
+100.4 Elapsed time to handle boost-lexical-cast:x64-linux: 75.7 ms
+100.4 boost-lexical-cast:x64-linux package ABI: 1c8c41ef9fb4037a0f0ff6d2a1e38765974db67459d9be915566cc5eebef96b4
+100.4 Installing 53/185 boost-algorithm:x64-linux@1.90.0...
+100.5 Elapsed time to handle boost-algorithm:x64-linux: 67.1 ms
+100.5 boost-algorithm:x64-linux package ABI: dcc930cc58a9c9455e55fd1d7742a002ce26e4e3052c5553399630ac76989e2e
+100.5 Installing 54/185 boost-date-time:x64-linux@1.90.0...
+100.5 Elapsed time to handle boost-date-time:x64-linux: 60.4 ms
+100.5 boost-date-time:x64-linux package ABI: 8b45fae7cdc9aa4ce1501be0e29f953394fbe4235448b5ddd6f8269c48287d93
+100.5 Installing 55/185 boost-ratio:x64-linux@1.90.0...
+100.6 Elapsed time to handle boost-ratio:x64-linux: 43 ms
+100.6 boost-ratio:x64-linux package ABI: 4c67ad3207140bfb4e87627ef17adb5f431a8df470c14f9ae506ca9ecab1c164
+100.6 Installing 56/185 boost-chrono:x64-linux@1.90.0...
+100.6 Elapsed time to handle boost-chrono:x64-linux: 56.4 ms
+100.6 boost-chrono:x64-linux package ABI: 56ca98dc92a34ed90fd427c8d1df8891733b2e0dc115757c52d8fa3da7ab0ca4
+100.6 Installing 57/185 boost-align:x64-linux@1.90.0...
+100.7 Elapsed time to handle boost-align:x64-linux: 49.2 ms
+100.7 boost-align:x64-linux package ABI: 2a2d8fde19378b82c9259963a547d35c9fefcfb8b39a6ec80aaa6f10f7e89b67
+100.7 Installing 58/185 boost-atomic:x64-linux@1.90.0...
+100.8 Elapsed time to handle boost-atomic:x64-linux: 73.8 ms
+100.8 boost-atomic:x64-linux package ABI: 00f3badc9da0ff223af45119243df6994ac773571f95046866104fa9acdafedc
+100.8 Installing 59/185 boost-thread:x64-linux@1.90.0...
+100.9 Elapsed time to handle boost-thread:x64-linux: 92.7 ms
+100.9 boost-thread:x64-linux package ABI: 9edf9fd0b2478c002554e60c658efb2be52bd53dc2aaa5c48f18e700701c63fd
+100.9 Installing 60/185 boost-proto:x64-linux@1.90.0...
+100.9 Elapsed time to handle boost-proto:x64-linux: 79.5 ms
+100.9 boost-proto:x64-linux package ABI: 2e99b7016a9280c386002c28b43e6b7927528da25cf6af2057e1d2b82ecb4b12
+100.9 Installing 61/185 boost-pool:x64-linux@1.90.0...
+101.0 Elapsed time to handle boost-pool:x64-linux: 54.3 ms
+101.0 boost-pool:x64-linux package ABI: 7958591ff389b593b25f25d9b213249cdcd930df82642b9b9b8335beb3197e57
+101.0 Installing 62/185 boost-phoenix:x64-linux@1.90.0...
+101.1 Elapsed time to handle boost-phoenix:x64-linux: 123 ms
+101.1 boost-phoenix:x64-linux package ABI: 21dfb7fe84e0d7cc79600963b81e0912a8c3827a7dcc169f5a000d9626e01cba
+101.1 Installing 63/185 boost-endian:x64-linux@1.90.0...
+101.2 Elapsed time to handle boost-endian:x64-linux: 68.7 ms
+101.2 boost-endian:x64-linux package ABI: fcaa0cde963a5e88050738692493067cf26b606f9cdc5b8e06e85e5bf73dd22a
+101.2 Installing 64/185 boost-spirit:x64-linux@1.90.0...
+101.5 Elapsed time to handle boost-spirit:x64-linux: 311 ms
+101.5 boost-spirit:x64-linux package ABI: c07e20c73df072f3aba206539ee569665169493fe74709e977bf65f7b67c1c77
+101.5 Installing 65/185 boost-xpressive:x64-linux@1.90.0...
+101.6 Elapsed time to handle boost-xpressive:x64-linux: 88.9 ms
+101.6 boost-xpressive:x64-linux package ABI: 6a6cf627cad45f8c08239f4172ddc101512868a27ea46803a46a99bce67231b9
+101.6 Installing 66/185 boost-serialization:x64-linux@1.90.0...
+101.7 Elapsed time to handle boost-serialization:x64-linux: 98.8 ms
+101.7 boost-serialization:x64-linux package ABI: ad6bce234c1476d8842e66307fd55e6976df866dffea3e6838c5bab22e2daea9
+101.7 Installing 67/185 boost-multi-index:x64-linux@1.90.0...
+101.7 Elapsed time to handle boost-multi-index:x64-linux: 68 ms
+101.7 boost-multi-index:x64-linux package ABI: 6a93d7a143f652baddec613c1992e344696af69b25dd23960e29d141904d5a72
+101.7 Installing 68/185 boost-format:x64-linux@1.90.0...
+101.8 Elapsed time to handle boost-format:x64-linux: 66.3 ms
+101.8 boost-format:x64-linux package ABI: 3766206ff96cb1283a0eb74af819db9fa9ee3c55e75b44d7e3f980fb2cdfc2cf
+101.8 Installing 69/185 boost-scope:x64-linux@1.90.0...
+101.9 Elapsed time to handle boost-scope:x64-linux: 63.7 ms
+101.9 boost-scope:x64-linux package ABI: 721681d3422c79379cf1c98b04032c7bc2fd7e6af9bec972ebfb67a1514741b0
+101.9 Installing 70/185 boost-filesystem:x64-linux@1.90.0...
+101.9 Elapsed time to handle boost-filesystem:x64-linux: 59.4 ms
+101.9 boost-filesystem:x64-linux package ABI: 1d6a34ec8d8606e3fe9aed79e540451967ac2c8ad3b60299dc656f3d23c92663
+101.9 Installing 71/185 boost-wave:x64-linux@1.90.0...
+102.0 Elapsed time to handle boost-wave:x64-linux: 84.2 ms
+102.0 boost-wave:x64-linux package ABI: 2a0a048111d5aad65f293e24d7587910c4a533eb084812812e156d0538fa7cb9
+102.0 Installing 72/185 boost-vmd:x64-linux@1.90.0...
+102.1 Elapsed time to handle boost-vmd:x64-linux: 82.3 ms
+102.1 boost-vmd:x64-linux package ABI: f497f494582fef7e1c851be40514ffac5ecc3f78075469b530d729ea13498cef
+102.1 Installing 73/185 boost-uuid:x64-linux@1.90.0...
+102.2 Elapsed time to handle boost-uuid:x64-linux: 63.6 ms
+102.2 boost-uuid:x64-linux package ABI: bac7953986f097d88110966948b8c3265b43313e435359d7918feb14abd37645
+102.2 Installing 74/185 boost-url:x64-linux@1.90.0...
+102.3 Elapsed time to handle boost-url:x64-linux: 108 ms
+102.3 boost-url:x64-linux package ABI: 80d640e607973ea0503871122634f617877f121f812c42c843672d377251166a
+102.3 Installing 75/185 boost-dynamic-bitset:x64-linux@1.90.0...
+102.4 Elapsed time to handle boost-dynamic-bitset:x64-linux: 74.1 ms
+102.4 boost-dynamic-bitset:x64-linux package ABI: 98186caf3d1ac7e026e018d5d50fcd5cdd56c280d8840eed351df1133f988b10
+102.4 Installing 76/185 boost-random:x64-linux@1.90.0...
+102.4 Elapsed time to handle boost-random:x64-linux: 73.8 ms
+102.4 boost-random:x64-linux package ABI: 35be948a66540273dbd94e6fbb9d624f6375c107c7212f03a96763e8fb31123d
+102.4 Installing 77/185 boost-math:x64-linux@1.90.0...
+102.6 Elapsed time to handle boost-math:x64-linux: 198 ms
+102.6 boost-math:x64-linux package ABI: 6116012187785aca3d24c4cb20aae8e9988a319630359158f6c364d53697c07c
+102.6 Installing 78/185 boost-lambda:x64-linux@1.90.0...
+102.7 Elapsed time to handle boost-lambda:x64-linux: 75.1 ms
+102.7 boost-lambda:x64-linux package ABI: c1b42ad8986032a73b643db5e379d8fd463c37cc36e8833c29259cb50f21a186
+102.7 Installing 79/185 boost-units:x64-linux@1.90.0...
+102.8 Elapsed time to handle boost-units:x64-linux: 129 ms
+102.8 boost-units:x64-linux package ABI: 3a7071e33f457e222b641802c8f8b7d516487b198153343c43c80eef6a5a1c47
+102.8 Installing 80/185 boost-logic:x64-linux@1.90.0...
+102.9 Elapsed time to handle boost-logic:x64-linux: 66.7 ms
+102.9 boost-logic:x64-linux package ABI: fe2b6f9f1058ec68ba85ec5c5fc565a458701b8ea52c6c119b0d17f03139541a
+102.9 Installing 81/185 boost-interval:x64-linux@1.90.0...
+103.0 Elapsed time to handle boost-interval:x64-linux: 71.8 ms
+103.0 boost-interval:x64-linux package ABI: 767b6794961111eb78f27a859585aae79bb35263cbd9f4dfd605d6fe6d4725db
+103.0 Installing 82/185 boost-any:x64-linux@1.90.0...
+103.0 Elapsed time to handle boost-any:x64-linux: 74.1 ms
+103.0 boost-any:x64-linux package ABI: 766c1f3c718f5d040c4046097415481a9b5821be7c992d5240af49bc66fc9854
+103.0 Installing 83/185 boost-property-tree:x64-linux@1.90.0...
+103.1 Elapsed time to handle boost-property-tree:x64-linux: 74.9 ms
+103.1 boost-property-tree:x64-linux package ABI: 6ecf9e54a989c58f939e75a3daabd72b886c8615eb306b5f994f5c97c6e6798a
+103.1 Installing 84/185 boost-compute:x64-linux@1.90.0...
+103.3 Elapsed time to handle boost-compute:x64-linux: 136 ms
+103.3 boost-compute:x64-linux package ABI: 2b0cccac12f1a1145728ec3aefe86029e5da2e3514309eacf01141dcab4b439d
+103.3 Installing 85/185 boost-ublas:x64-linux@1.90.0...
+103.4 Elapsed time to handle boost-ublas:x64-linux: 106 ms
+103.4 boost-ublas:x64-linux package ABI: a588ff1f074cb8d2b18a736ccc398c29248375c8bae9eee45f60e00295dbe7b7
+103.4 Installing 86/185 boost-type-erasure:x64-linux@1.90.0...
+103.4 Elapsed time to handle boost-type-erasure:x64-linux: 81.1 ms
+103.4 boost-type-erasure:x64-linux package ABI: 2c45d554d37359df308e1f26eb37e4f93261fe4c07c0be3dcef9bc72fc8eb32b
+103.4 Installing 87/185 boost-tti:x64-linux@1.90.0...
+103.5 Elapsed time to handle boost-tti:x64-linux: 79.4 ms
+103.5 boost-tti:x64-linux package ABI: c813b096924d0d19fa5b2d7a6768a2c719d5d73a4872fd589f696b3ff912ff2a
+103.5 Installing 88/185 boost-timer:x64-linux@1.90.0...
+103.6 Elapsed time to handle boost-timer:x64-linux: 76.2 ms
+103.6 boost-timer:x64-linux package ABI: d471c816dc3023f7b28a61b21e8e5c4bbe8a4bf9dfef536984d91fdb68447be9
+103.6 Installing 89/185 boost-test:x64-linux@1.90.0...
+103.7 Elapsed time to handle boost-test:x64-linux: 113 ms
+103.7 boost-test:x64-linux package ABI: c17bb98a031341e1a5385df120255e3db1a92c89b7495dee4013d81e054ab67f
+103.7 Installing 90/185 boost-stl-interfaces:x64-linux@1.90.0...
+103.8 Elapsed time to handle boost-stl-interfaces:x64-linux: 77.9 ms
+103.8 boost-stl-interfaces:x64-linux package ABI: cdd8272dd589fa07e0f5e0fabd0cb0e2e2421ce11a1f792227cc9894edaf6eb0
+103.8 Installing 91/185 boost-static-string:x64-linux@1.90.0...
+103.9 Elapsed time to handle boost-static-string:x64-linux: 67.4 ms
+103.9 boost-static-string:x64-linux package ABI: 7dc7af57df45e5f51f648d319f9027a48fae964cf719fe8f6dd578069e96f326
+103.9 Installing 92/185 boost-statechart:x64-linux@1.90.0...
+103.9 Elapsed time to handle boost-statechart:x64-linux: 75.4 ms
+103.9 boost-statechart:x64-linux package ABI: 2f350951ab0e6a06172d7ddb9f2918d0bc9feff1f7cb634604592ee19b1dcd26
+103.9 Installing 93/185 libbacktrace:x64-linux@2024-11-30...
+104.0 Elapsed time to handle libbacktrace:x64-linux: 68 ms
+104.0 libbacktrace:x64-linux package ABI: 0077f15c21033ae926343445afd63cbaa9047a600ed7c996057ad49e9399ee6b
+104.0 Installing 94/185 boost-stacktrace[backtrace,core]:x64-linux@1.90.0...
+104.1 Elapsed time to handle boost-stacktrace:x64-linux: 94.8 ms
+104.1 boost-stacktrace:x64-linux package ABI: 64f9811c223e9868a23d0ce8eed0d8d7448c980cee3f3ac10f1a9564e7b8e619
+104.1 Installing 95/185 boost-sort:x64-linux@1.90.0...
+104.2 Elapsed time to handle boost-sort:x64-linux: 94.9 ms
+104.2 boost-sort:x64-linux package ABI: d22e5bb138c83a31bc95e8f076341cba0fec21813f9ec97b88d0657e8bf9f01b
+104.2 Installing 96/185 boost-parameter:x64-linux@1.90.0...
+104.3 Elapsed time to handle boost-parameter:x64-linux: 93.6 ms
+104.3 boost-parameter:x64-linux package ABI: 400dc141a80eb45c1bbe55cb8f6120677ba0454ce8c1d3717620fe34de30dc59
+104.3 Installing 97/185 boost-signals2:x64-linux@1.90.0...
+104.4 Elapsed time to handle boost-signals2:x64-linux: 108 ms
+104.4 boost-signals2:x64-linux package ABI: b115838086d0beb64eb306010cfb2bf7f57462869f019eb0d13c3a12f6f0fcf1
+104.4 Installing 98/185 boost-scope-exit:x64-linux@1.90.0...
+104.5 Elapsed time to handle boost-scope-exit:x64-linux: 73.9 ms
+104.5 boost-scope-exit:x64-linux package ABI: daca070fdd1fc2f7c7abfafabf5eba55ccc437b39f8dfe0dc474c667a8e1df1b
+104.5 Installing 99/185 boost-safe-numerics:x64-linux@1.90.0...
+104.5 Elapsed time to handle boost-safe-numerics:x64-linux: 82 ms
+104.5 boost-safe-numerics:x64-linux package ABI: 5c0a975f37b0cc57e5e9ad556da78574543b7f3ab588c92c8f0381dd606f2aa3
+104.5 Installing 100/185 boost-context:x64-linux@1.90.0...
+104.6 Elapsed time to handle boost-context:x64-linux: 78.7 ms
+104.6 boost-context:x64-linux package ABI: cdd8aca11fae5bd5f92a37ec0335fec550733c33ff3edcaa98aa88054cede015
+104.6 Installing 101/185 boost-asio[core,deadline-timer,spawn]:x64-linux@1.90.0...
+104.9 Elapsed time to handle boost-asio:x64-linux: 224 ms
+104.9 boost-asio:x64-linux package ABI: bca7c4b670d88d3ceecee5d7f64cb2670b898c8c9557526e403a71883d910395
+104.9 Installing 102/185 boost-redis:x64-linux@1.90.0...
+104.9 Elapsed time to handle boost-redis:x64-linux: 95.4 ms
+104.9 boost-redis:x64-linux package ABI: 4f452ee9bb57fcbf77f18def243c13b3a310dcef3b96562866777eba559e68fd
+104.9 Installing 103/185 boost-rational:x64-linux@1.90.0...
+105.0 Elapsed time to handle boost-rational:x64-linux: 89.3 ms
+105.0 boost-rational:x64-linux package ABI: 13bb2c42aae60401ca22f311f19e260f829b690332fa8aa92091fd0fac7167ec
+105.0 Installing 104/185 boost-qvm:x64-linux@1.90.0...
+105.1 Elapsed time to handle boost-qvm:x64-linux: 96.5 ms
+105.1 boost-qvm:x64-linux package ABI: 3b09da43c502bdc154583fdfc9d0b3b298d798acfc863814eebd466914610287
+105.1 Installing 105/185 sqlite3[core,json1]:x64-linux@3.51.1...
+105.2 Elapsed time to handle sqlite3:x64-linux: 85.2 ms
+105.2 sqlite3:x64-linux package ABI: 159aa4014f3a87239e8c8b9f3ba4d3f465d43ca1a23a8959bc55a4d9f4f2f109
+105.2 Installing 106/185 vcpkg-cmake-get-vars:x64-linux@2025-05-29...
+105.3 Elapsed time to handle vcpkg-cmake-get-vars:x64-linux: 76.8 ms
+105.3 vcpkg-cmake-get-vars:x64-linux package ABI: d6e7527fb3c2b1ebd68ac82e9dab2f97ec03fe44c51172aed55d4cd2e4acbf6a
+105.3 Installing 107/185 openssl:x64-linux@3.6.0#3...
+105.4 Elapsed time to handle openssl:x64-linux: 134 ms
+105.4 openssl:x64-linux package ABI: f4929bce27afe237a95c28ace240ef012569a359d131bbaeea034de6883bab62
+105.4 Installing 108/185 ncurses:x64-linux@6.5#1...
+105.5 Elapsed time to handle ncurses:x64-linux: 91.7 ms
+105.5 ncurses:x64-linux package ABI: 0f8b8b93d09aef290b5f64238d88251219537501d749316cbca1e964bbcba9b5
+105.5 Installing 109/185 liblzma:x64-linux@5.8.2...
+105.6 Elapsed time to handle liblzma:x64-linux: 93 ms
+105.6 liblzma:x64-linux package ABI: 6916bd03b52484dec6630067e2656813c3a4092c5a560ca9d859ffb0837dfbf6
+105.6 Installing 110/185 vcpkg-make:x64-linux@2025-10-26...
+105.7 Elapsed time to handle vcpkg-make:x64-linux: 82.3 ms
+105.7 vcpkg-make:x64-linux package ABI: cb5b428de88605b593c536ed7e926fd081a7fada0cf1aaab7c12273a4387aee5
+105.7 Installing 111/185 libffi:x64-linux@3.5.2...
+105.8 Elapsed time to handle libffi:x64-linux: 84.8 ms
+105.8 libffi:x64-linux package ABI: c59d2d1237dd4daeff1e69324c28854fc2cf2b5e3c2eaeb517e88af8e434df27
+105.8 Installing 112/185 expat:x64-linux@2.7.3...
+105.9 Elapsed time to handle expat:x64-linux: 81.2 ms
+105.9 expat:x64-linux package ABI: 691bc3e11282ca8a56ea690872fbdf19842e6bd3907e5db1f3c08da3ac0bdbdb
+105.9 Installing 113/185 bzip2[core,tool]:x64-linux@1.0.8#6...
+105.9 Elapsed time to handle bzip2:x64-linux: 85.5 ms
+105.9 bzip2:x64-linux package ABI: 38783794133bba5ddb65bfd2c1231fae4c9bb2c0b01605fc3370e32cf158979c
+105.9 Installing 114/185 zlib:x64-linux@1.3.1...
+106.0 Elapsed time to handle zlib:x64-linux: 77.6 ms
+106.0 zlib:x64-linux package ABI: 3a2fb7406bddb76203339af4ad37da87b8eed0f1c1ce9527005342b3aa893a02
+106.0 Installing 115/185 vcpkg-get-python:x64-linux@2025-02-09...
+106.1 Elapsed time to handle vcpkg-get-python:x64-linux: 79.4 ms
+106.1 vcpkg-get-python:x64-linux package ABI: 8f339bba512579d79b0fcf319b5d0da60df5d0d2a9dfac52cdacbac0ae52b651
+106.1 Installing 116/185 libuuid:x64-linux@1.0.3#15...
+106.2 Elapsed time to handle libuuid:x64-linux: 81 ms
+106.2 libuuid:x64-linux package ABI: 4b66a9754ace79624676e57c0e77dd6c978690b0134295f9195fa0b64ef8314f
+106.2 Installing 117/185 libiconv:x64-linux@1.18#3...
+106.3 Elapsed time to handle libiconv:x64-linux: 86.1 ms
+106.3 libiconv:x64-linux package ABI: fcc29630ab22ecea333b4a22c6fcf0d88c86f6a418bdc4929016f4ad48ebc1a0
+106.3 Installing 118/185 gettext-libintl:x64-linux@0.22.5#4...
+106.3 Elapsed time to handle gettext-libintl:x64-linux: 78.1 ms
+106.3 gettext-libintl:x64-linux package ABI: 38907c91f23ac9512001c0cf35978b955bb5e32501640f3cd190e76651e4e46e
+106.3 Installing 119/185 python3[core,extensions]:x64-linux@3.12.9#7...
+108.0 Elapsed time to handle python3:x64-linux: 1.6 s
+108.0 python3:x64-linux package ABI: 91fb5aef15b1651c6796a6ca296cd817ca00030d8d5dc05bb33ca7ffe9fdd4bc
+108.0 Installing 120/185 boost-property-map:x64-linux@1.90.0...
+108.2 Elapsed time to handle boost-property-map:x64-linux: 210 ms
+108.2 boost-property-map:x64-linux package ABI: 369980983d0584d55b3dd46bd811fdaa5c992eaa91f0281392988c8718b58c4e
+108.2 Installing 121/185 boost-foreach:x64-linux@1.90.0...
+108.3 Elapsed time to handle boost-foreach:x64-linux: 128 ms
+108.3 boost-foreach:x64-linux package ABI: 468c87f33d885682d820aca813224d4945191c2e6ef2bd42d44f3cf1622d8d42
+108.3 Installing 122/185 boost-bimap:x64-linux@1.90.0...
+108.4 Elapsed time to handle boost-bimap:x64-linux: 135 ms
+108.4 boost-bimap:x64-linux package ABI: b581ddc2e91402240b09b7a8fe7341b7c20bc09273d7b2f5b8840fad4d05c774
+108.4 Installing 123/185 boost-graph:x64-linux@1.90.0...
+108.7 Elapsed time to handle boost-graph:x64-linux: 212 ms
+108.7 boost-graph:x64-linux package ABI: 9a08339fa54bd369cc4c298b779c8fff37a6cc1577cc0e771614803cfaca1083
+108.7 Installing 124/185 boost-python:x64-linux@1.90.0...
+108.8 Elapsed time to handle boost-python:x64-linux: 190 ms
+108.8 boost-python:x64-linux package ABI: deac95463c2aba811b11a51776a207267390f6d83d447d465add6057b8467c47
+108.8 Installing 125/185 boost-circular-buffer:x64-linux@1.90.0...
+109.0 Elapsed time to handle boost-circular-buffer:x64-linux: 126 ms
+109.0 boost-circular-buffer:x64-linux package ABI: d39f761ade05d94b5fdda40b46c40765acee1454cc588cd390603edc0c520032
+109.0 Installing 126/185 boost-ptr-container:x64-linux@1.90.0...
+109.1 Elapsed time to handle boost-ptr-container:x64-linux: 127 ms
+109.1 boost-ptr-container:x64-linux package ABI: 2a0ce915c9cbea377efccd656b736008aefad86412107e9c6e4eb219753805c4
+109.1 Installing 127/185 boost-program-options:x64-linux@1.90.0...
+109.2 Elapsed time to handle boost-program-options:x64-linux: 122 ms
+109.2 boost-program-options:x64-linux package ABI: 1f9a366661e0da83606fb656deec7fc15833cfdee06463e10efd6983538b3ffa
+109.2 Installing 128/185 boost-process:x64-linux@1.90.0...
+109.4 Elapsed time to handle boost-process:x64-linux: 170 ms
+109.4 boost-process:x64-linux package ABI: 7fb468de5d1d34361c997d6f32c593ef6c1bf834445d31fe654f6eedcce519e7
+109.4 Installing 129/185 boost-polygon:x64-linux@1.90.0...
+109.5 Elapsed time to handle boost-polygon:x64-linux: 127 ms
+109.5 boost-polygon:x64-linux package ABI: d7323b33a9efc73caebfaecbcbb4fc1298e8a45dbef2dd7ac757be702f1eb350
+109.5 Installing 130/185 boost-poly-collection:x64-linux@1.90.0...
+109.7 Elapsed time to handle boost-poly-collection:x64-linux: 170 ms
+109.7 boost-poly-collection:x64-linux package ABI: cc76bcc56347eff1ac80eada012cfba833b207b588ae7d9ad7697e43080274ef
+109.7 Installing 131/185 boost-pfr:x64-linux@1.90.0...
+109.8 Elapsed time to handle boost-pfr:x64-linux: 139 ms
+109.8 boost-pfr:x64-linux package ABI: cdab41fe5dc4fb33fd9ca33e8cf3d2f787fd1ffffd3a5ce46b3446206e02ed89
+109.8 Installing 132/185 boost-charconv:x64-linux@1.90.0...
+110.0 Elapsed time to handle boost-charconv:x64-linux: 138 ms
+110.0 boost-charconv:x64-linux package ABI: b07ba82c89535eedb758f30c7324c461d42eccc7cb54d226858262240ced1e1f
+110.0 Installing 133/185 boost-parser:x64-linux@1.90.0...
+110.1 Elapsed time to handle boost-parser:x64-linux: 145 ms
+110.1 boost-parser:x64-linux package ABI: ed975f9d5bdc2d0491b7b447f8a161e6609467fc9e3a7a7320943eb7ce4480c5
+110.1 Installing 134/185 boost-parameter-python:x64-linux@1.90.0...
+110.2 Elapsed time to handle boost-parameter-python:x64-linux: 133 ms
+110.2 boost-parameter-python:x64-linux package ABI: b676eeadad6833730927eae029ab59319bc5e6fed56468a309b76b98d1f21ace
+110.2 Installing 135/185 boost-outcome:x64-linux@1.90.0...
+110.4 Elapsed time to handle boost-outcome:x64-linux: 143 ms
+110.4 boost-outcome:x64-linux package ABI: 361fdd3a6eaaf07c1bb89c5f5fa850ffa2403ac11c0f6cd51cb6579103420fb9
+110.4 Installing 136/185 boost-openmethod:x64-linux@1.90.0...
+110.5 Elapsed time to handle boost-openmethod:x64-linux: 132 ms
+110.5 boost-openmethod:x64-linux package ABI: 24a0cc7e27f4444436331ddae0849b271e7ee4f392ebc7ffde408da41ed9cb89
+110.5 Installing 137/185 boost-multi-array:x64-linux@1.90.0...
+110.7 Elapsed time to handle boost-multi-array:x64-linux: 141 ms
+110.7 boost-multi-array:x64-linux package ABI: 2dd5386c01f961d58a8ec005866f4f6c235e172b7ab494fdbbce75c3b5c7a371
+110.7 Installing 138/185 boost-odeint:x64-linux@1.90.0...
+110.8 Elapsed time to handle boost-odeint:x64-linux: 190 ms
+110.8 boost-odeint:x64-linux package ABI: 96e75f9304a98d0663cec7fab8ec22869cf30ea427858977684a1e9d53c3ce71
+110.8 Installing 139/185 boost-nowide:x64-linux@1.90.0...
+111.0 Elapsed time to handle boost-nowide:x64-linux: 164 ms
+111.0 boost-nowide:x64-linux package ABI: 6b5bc68d6b4391e659e23bb5b4a62cc607005512a9f702b529fe12becb4dfca1
+111.0 Installing 140/185 boost-compat:x64-linux@1.90.0...
+111.1 Elapsed time to handle boost-compat:x64-linux: 125 ms
+111.1 boost-compat:x64-linux package ABI: 4d2020cf113e41d028e7492df984a5b44ecd7e7ff245d1f9cd7b0fae6e0df0aa
+111.1 Installing 141/185 boost-mysql:x64-linux@1.90.0...
+111.3 Elapsed time to handle boost-mysql:x64-linux: 168 ms
+111.3 boost-mysql:x64-linux package ABI: 495298e2c3d8b3cc8927c7460876b810a6eeb7f3a266af17d005a273c0b377ad
+111.3 Installing 142/185 boost-multiprecision:x64-linux@1.90.0...
+111.5 Elapsed time to handle boost-multiprecision:x64-linux: 162 ms
+111.5 boost-multiprecision:x64-linux package ABI: a1fc61fcf9abe1da7d3557485484a6d85cbd3ed6e0d63cb4478ee1a02760620b
+111.5 Installing 143/185 boost-msm:x64-linux@1.90.0...
+111.6 Elapsed time to handle boost-msm:x64-linux: 163 ms
+111.6 boost-msm:x64-linux package ABI: 1dff496fcb3474de2f61a75f7d7ebfd927b1b953ff735a899c669eb82bbd726f
+111.6 Installing 144/185 boost-mqtt5:x64-linux@1.90.0...
+111.8 Elapsed time to handle boost-mqtt5:x64-linux: 183 ms
+111.8 boost-mqtt5:x64-linux package ABI: bcbe4e5525ea812a3560afced00cd8c61be5567e2247ff13cdc74dadb31b246c
+111.8 Installing 145/185 boost-metaparse:x64-linux@1.90.0...
+112.0 Elapsed time to handle boost-metaparse:x64-linux: 198 ms
+112.0 boost-metaparse:x64-linux package ABI: 3a775555198288b26fe71f39ab9f3365f23e31fd66d1c754a182f19a96154a6c
+112.0 Installing 146/185 boost-interprocess:x64-linux@1.90.0...
+112.2 Elapsed time to handle boost-interprocess:x64-linux: 170 ms
+112.2 boost-interprocess:x64-linux package ABI: 7b4c6a938cd4cdb8c1109f14c776c62587c14ff083a4a8c1ead0b8353a4362fb
+112.2 Installing 147/185 boost-log:x64-linux@1.90.0...
+112.4 Elapsed time to handle boost-log:x64-linux: 214 ms
+112.4 boost-log:x64-linux package ABI: 2c7862af3b16672c767b2c43f414187024a6793b5fbef966ccb9ecff058482fd
+112.4 Installing 148/185 boost-lockfree:x64-linux@1.90.0...
+112.5 Elapsed time to handle boost-lockfree:x64-linux: 142 ms
+112.5 boost-lockfree:x64-linux package ABI: abf19a0d2d2431446a76628a3dde5eba30fe623d0cacc04a323ab6520b014fa5
+112.5 Installing 149/185 boost-locale:x64-linux@1.90.0...
+112.7 Elapsed time to handle boost-locale:x64-linux: 152 ms
+112.7 boost-locale:x64-linux package ABI: 915f67393f9929025f55acbd7da382ff6326e56e08b29065d5dc9c9646ce2f33
+112.7 Installing 150/185 boost-local-function:x64-linux@1.90.0...
+112.9 Elapsed time to handle boost-local-function:x64-linux: 197 ms
+112.9 boost-local-function:x64-linux package ABI: 07ee1900027c73f1c021744c8b0f2da5a9fa3cc35f305cab8ae3821a9524fa70
+112.9 Installing 151/185 boost-leaf:x64-linux@1.90.0...
+113.0 Elapsed time to handle boost-leaf:x64-linux: 138 ms
+113.0 boost-leaf:x64-linux package ABI: a55e1fc0f0e7157fd3c467f2eeb4ea37cd26f3a236b94da80d573b747d4ce62f
+113.0 Installing 152/185 boost-lambda2:x64-linux@1.90.0...
+113.1 Elapsed time to handle boost-lambda2:x64-linux: 124 ms
+113.1 boost-lambda2:x64-linux package ABI: 67befe51b0fcaeaf215b9960aced5458a515ee74339023fee7f99a29584a7fea
+113.1 Installing 153/185 boost-json:x64-linux@1.90.0...
+113.3 Elapsed time to handle boost-json:x64-linux: 186 ms
+113.3 boost-json:x64-linux package ABI: 26989a9b0d77ec7787eaec96abbeaa23bc522884e9f0402ce3e9d7348d8274c4
+113.3 Installing 154/185 zstd:x64-linux@1.5.7...
+113.5 Elapsed time to handle zstd:x64-linux: 146 ms
+113.5 zstd:x64-linux package ABI: 56f9d1aed75d2ba9f27d73fb2ad8bd64d74fb4de46c3683134cd26fd644c9d4d
+113.5 Installing 155/185 boost-iostreams[bzip2,core,lzma,zlib,zstd]:x64-linux@1.90.0...
+113.7 Elapsed time to handle boost-iostreams:x64-linux: 175 ms
+113.7 boost-iostreams:x64-linux package ABI: 8175678cc56a5e0a2b12485c2759745fc07ac55ed3db28a5fd3591286930e7b0
+113.7 Installing 156/185 boost-icl:x64-linux@1.90.0...
+113.8 Elapsed time to handle boost-icl:x64-linux: 164 ms
+113.8 boost-icl:x64-linux package ABI: 566b0242b5780b249e742ce77edf756de9f05d3f3aa54d6c45c2097da495d095
+113.8 Installing 157/185 boost-hof:x64-linux@1.90.0...
+114.0 Elapsed time to handle boost-hof:x64-linux: 174 ms
+114.0 boost-hof:x64-linux package ABI: 9c603cea8070248709730de2d87b7232d7b257c0f51515eb743601dc4a4f681d
+114.0 Installing 158/185 boost-histogram:x64-linux@1.90.0...
+114.1 Elapsed time to handle boost-histogram:x64-linux: 146 ms
+114.1 boost-histogram:x64-linux package ABI: 5a6033526941b0bda0ca1f8ec6d6bc8251e7b3f3734173848b1dea635cc7ea0f
+114.1 Installing 159/185 boost-heap:x64-linux@1.90.0...
+114.3 Elapsed time to handle boost-heap:x64-linux: 142 ms
+114.3 boost-heap:x64-linux package ABI: 1b20240077d9e9e3bfbb7cc65388034bffec26088927809e77688963c5f2b2a7
+114.3 Installing 160/185 boost-hash2:x64-linux@1.90.0...
+114.4 Elapsed time to handle boost-hash2:x64-linux: 145 ms
+114.4 boost-hash2:x64-linux package ABI: 1b9402d42ceeb00afc4a84bc6c81352913fbb03fa348e15bbf5f96070f32165a
+114.4 Installing 161/185 boost-gil:x64-linux@1.90.0...
+114.6 Elapsed time to handle boost-gil:x64-linux: 187 ms
+114.6 boost-gil:x64-linux package ABI: 9bfcf509fabc04b0987e09b99ad00223005eaac1954e57b952a43200bdb525b1
+114.6 Installing 162/185 boost-crc:x64-linux@1.90.0...
+114.8 Elapsed time to handle boost-crc:x64-linux: 147 ms
+114.8 boost-crc:x64-linux package ABI: 9e96875ece70e899317db751b0f8da0280066ff525531398a868ed4ca535823c
+114.8 Installing 163/185 boost-geometry:x64-linux@1.90.0...
+115.2 Elapsed time to handle boost-geometry:x64-linux: 452 ms
+115.2 boost-geometry:x64-linux package ABI: bca5cc08b0c707818877ee6e972f455c710f67f28c3aa7df066abdb2d211b28f
+115.2 Installing 164/185 boost-flyweight:x64-linux@1.90.0...
+115.4 Elapsed time to handle boost-flyweight:x64-linux: 153 ms
+115.4 boost-flyweight:x64-linux package ABI: 317b33ef8af39028bf59edb57e352039493259e6d9912b888188db4f1eb79641
+115.4 Installing 165/185 boost-fiber:x64-linux@1.90.0...
+115.6 Elapsed time to handle boost-fiber:x64-linux: 191 ms
+115.6 boost-fiber:x64-linux package ABI: 4590d71bb214cb32cf0cbde0c98ac8f3dbd58741bca04085a96ef70525a0ac43
+115.6 Installing 166/185 boost-dll:x64-linux@1.90.0...
+115.7 Elapsed time to handle boost-dll:x64-linux: 152 ms
+115.7 boost-dll:x64-linux package ABI: 4473e952ada7e4ea43cb5ec14e50f000acca5b9742829e4a483b472c9ac01c33
+115.7 Installing 167/185 boost-coroutine2:x64-linux@1.90.0...
+115.9 Elapsed time to handle boost-coroutine2:x64-linux: 165 ms
+115.9 boost-coroutine2:x64-linux package ABI: 6a650416db0ff74224f838bf268576ad5dd3c50c2bdb2ebda1d6493389539171
+115.9 Installing 168/185 boost-coroutine:x64-linux@1.90.0...
+116.1 Elapsed time to handle boost-coroutine:x64-linux: 207 ms
+116.1 boost-coroutine:x64-linux package ABI: d59055683ada1a906cb270b5982917171e00589880385b8493f8ca25d71efea1
+116.1 Installing 169/185 boost-convert:x64-linux@1.90.0...
+116.4 Elapsed time to handle boost-convert:x64-linux: 293 ms
+116.4 boost-convert:x64-linux package ABI: d043a15fc03c4889f8a5da0d6f7509d3d2309c96773f0a31b1f44f4965c29ae6
+116.4 Installing 170/185 boost-contract:x64-linux@1.90.0...
+116.6 Elapsed time to handle boost-contract:x64-linux: 224 ms
+116.6 boost-contract:x64-linux package ABI: 2c01d33b3fdb85ee48fa57da6b495d00c8f7ed7316a82eac66f0ac0745f633e5
+116.6 Installing 171/185 boost-callable-traits:x64-linux@1.90.0...
+116.8 Elapsed time to handle boost-callable-traits:x64-linux: 162 ms
+116.8 boost-callable-traits:x64-linux package ABI: dc94fc595924743ee60cd2c1c0dc1e2ac70129b4901db79d3bb348f6a74224d5
+116.8 Installing 172/185 boost-cobalt:x64-linux@1.90.0...
+116.9 Elapsed time to handle boost-cobalt:x64-linux: 171 ms
+116.9 boost-cobalt:x64-linux package ABI: 5745596f2467f34ebfbfa3eb254afd3c62610d1bfd80149083e43a4c7a2364d9
+116.9 Installing 173/185 boost-bloom:x64-linux@1.90.0...
+117.1 Elapsed time to handle boost-bloom:x64-linux: 182 ms
+117.1 boost-bloom:x64-linux package ABI: c1c5120386dd3856060ae351bf403d2339a2b4434ee0ec108c3ca42ba8bae934
+117.1 Installing 174/185 boost-beast:x64-linux@1.90.0...
+117.3 Elapsed time to handle boost-beast:x64-linux: 192 ms
+117.3 boost-beast:x64-linux package ABI: 0bbb13a34dbf723b8471fc85e5be7b7a0d31c9cba18cbfe05c53d8429feec21a
+117.3 Installing 175/185 boost-assign:x64-linux@1.90.0...
+117.5 Elapsed time to handle boost-assign:x64-linux: 188 ms
+117.5 boost-assign:x64-linux package ABI: 081b5bbfe66f07d07c550c8a5e52bf69049e2d521d0fa523d789d633c817367d
+117.5 Installing 176/185 boost-accumulators:x64-linux@1.90.0...
+117.7 Elapsed time to handle boost-accumulators:x64-linux: 164 ms
+117.7 boost-accumulators:x64-linux package ABI: 404d61d2885109494c4fde72f6b7032656f272cf2a4b8c7261af570021db54da
+117.7 Installing 177/185 boost:x64-linux@1.90.0...
+117.8 Elapsed time to handle boost:x64-linux: 144 ms
+117.8 boost:x64-linux package ABI: 7e64fa8892b21c440c882fc60d5dbc8e569679ebef14e7b7936636a0f8a95ef7
+117.8 Installing 178/185 rapidjson:x64-linux@2025-02-26...
+118.0 Elapsed time to handle rapidjson:x64-linux: 172 ms
+118.0 rapidjson:x64-linux package ABI: 133c18233b721598eb42f09e6f644145760dfd5156b1aae164a8d2adf83d7f8b
+118.0 Installing 179/185 lz4:x64-linux@1.10.0...
+118.1 Elapsed time to handle lz4:x64-linux: 171 ms
+118.1 lz4:x64-linux package ABI: 46c81b603b89fa6aa8b8b09076ced86e1609076136076d03b93d946214b36d8a
+118.1 Installing 180/185 libmysql:x64-linux@8.0.40#1...
+118.3 Elapsed time to handle libmysql:x64-linux: 199 ms
+118.3 libmysql:x64-linux package ABI: a2428bf4b12eeba16bbdf5e12be5e32a46ca32ecfd298d20390a551ff47d5fc7
+118.3 Installing 181/185 abseil:x64-linux@20250814.1...
+118.7 Elapsed time to handle abseil:x64-linux: 405 ms
+118.8 abseil:x64-linux package ABI: 5458b64d07f6d2ea856284ffd5f7c67f95e22e3e1294323488d231deb34b7ce1
+118.8 Installing 182/185 utf8-range:x64-linux@5.29.5...
+118.9 Elapsed time to handle utf8-range:x64-linux: 158 ms
+118.9 utf8-range:x64-linux package ABI: a17a1bbfd9931ea0d75a2458d2e351fcdae73f173bd753b0e810416319d05838
+118.9 Installing 183/185 protobuf:x64-linux@5.29.5#3...
+119.2 Elapsed time to handle protobuf:x64-linux: 257 ms
+119.2 protobuf:x64-linux package ABI: a022b19dd95f6777cf3eadb9381526f8179e7d06a4c9aeafc6fbf12d03212e9e
+119.2 Installing 184/185 mysql-connector-cpp[core,jdbc]:x64-linux@9.1.0#4...
+119.3 Elapsed time to handle mysql-connector-cpp:x64-linux: 182 ms
+119.3 mysql-connector-cpp:x64-linux package ABI: 9ae885d73ea0ce96b142208e7734913a6b00a7d8f34b6f5b0bc8d7a42febdc5b
+119.3 Installing 185/185 nlohmann-json:x64-linux@3.12.0#1...
+119.5 Elapsed time to handle nlohmann-json:x64-linux: 171 ms
+119.5 nlohmann-json:x64-linux package ABI: a00baad6938df848dcfd1ce1e8588f027343931ebfa92210460d02104ac80e78
+119.6 Installed contents are licensed to you by owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+119.6 Some packages did not declare an SPDX license. Check the `copyright` file for each package for more information about their licensing.
+119.6 Packages installed in this vcpkg installation declare the following licenses:
+119.6 (BSD-3-Clause OR GPL-2.0-only)
+119.6 Apache-2.0
+119.6 BSD-2-Clause
+119.6 BSD-3-Clause
+119.6 BSL-1.0
+119.6 GPL-2.0-or-later
+119.6 LGPL-2.1-or-later
+119.6 MIT
+119.6 Python-2.0
+119.6 Zlib
+119.6 blessing
+119.6 bzip2-1.0.6
+119.6 openssl is compatible with built-in CMake targets:
+119.6
+119.6   find_package(OpenSSL REQUIRED)
+119.6   target_link_libraries(main PRIVATE OpenSSL::SSL)
+119.6   target_link_libraries(main PRIVATE OpenSSL::Crypto)
+119.6
+119.7 mysql-connector-cpp provides CMake targets:
+119.7
+119.7   # this is heuristically generated, and may not be correct
+119.7   find_package(unofficial-mysql-connector-cpp CONFIG REQUIRED)
+119.7   target_link_libraries(main PRIVATE unofficial::mysql-connector-cpp::connector unofficial::mysql-connector-cpp::connector-jdbc)
+119.7
+119.7 The package nlohmann-json provides CMake targets:
+119.7
+119.7     find_package(nlohmann_json CONFIG REQUIRED)
+119.7     target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)
+119.7
+119.7 The package nlohmann-json can be configured to not provide implicit conversions via a custom triplet file:
+119.7
+119.7     set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
+119.7
+119.7 For more information, see the docs here:
+119.7
+119.7     https://json.nlohmann.me/api/macros/json_use_implicit_conversions/
+119.7
+119.7 All requested installations completed successfully in: 22 s
+120.8 -- Running vcpkg install - done
+120.9 -- The C compiler identification is GNU 11.4.0
+121.1 -- The CXX compiler identification is GNU 11.4.0
+121.1 -- Detecting C compiler ABI info
+121.5 -- Detecting C compiler ABI info - done
+121.6 -- Check for working C compiler: /usr/bin/cc - skipped
+121.6 -- Detecting C compile features
+121.6 -- Detecting C compile features - done
+121.6 -- Detecting CXX compiler ABI info
+122.1 -- Detecting CXX compiler ABI info - done
+122.1 -- Check for working CXX compiler: /usr/bin/c++ - skipped
+122.2 -- Detecting CXX compile features
+122.2 -- Detecting CXX compile features - done
+122.6 -- Looking for pthread.h
+123.1 -- Looking for pthread.h - found
+123.1 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+123.5 -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+123.6 -- Found Threads: TRUE
+123.6 -- Found OpenSSL: /app/build/vcpkg_installed/x64-linux/lib/libcrypto.a (found version "3.6.0")
+123.6 -- Found nlohmann_json: /app/build/vcpkg_installed/x64-linux/share/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0")
+123.8 -- Found Protobuf: /app/build/vcpkg_installed/x64-linux/tools/protobuf/protoc (found version "29.5.0")
+123.9 -- Found ZLIB: optimized;/app/build/vcpkg_installed/x64-linux/lib/libz.a;debug;/app/build/vcpkg_installed/x64-linux/debug/lib/libz.a (found version "1.3.1")
+124.1 -- ========================================
+124.1 -- Project: Bejeweled_Server
+124.1 -- Build type: Release
+124.1 -- C++ standard: 20
+124.1 -- ========================================
+124.1 -- Configuring done
+124.1 -- Generating done
+124.1 -- Build files have been written to: /app/build
+124.5 [ 20%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/authServer/AuthServer.cpp.o
+124.5 [ 20%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/authServer/AuthNetData.cpp.o
+162.0 [ 30%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/gameServer/GameNetData.cpp.o
+175.3 [ 40%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/gameServer/GameServer.cpp.o
+212.7 [ 50%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/main.cpp.o
+218.3 [ 60%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/otherServer/OtherNetData.cpp.o
+223.0 [ 70%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/otherServer/OtherServer.cpp.o
+287.9 [ 80%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/util/Config.cpp.o
+293.9 [ 90%] Building CXX object CMakeFiles/Bejeweled_Server.dir/src/util/SqlUtil.cpp.o
+319.2 [100%] Linking CXX executable Bejeweled_Server
+320.2 /usr/bin/ld: vcpkg_installed/x64-linux/lib/libmysqlclient.a(compression.cc.o): in function `get_compression_algorithm(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+320.2 compression.cc:(.text._Z25get_compression_algorithmNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE+0x0): multiple definition of `get_compression_algorithm(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)'; vcpkg_installed/x64-linux/lib/libmysqlcppconnx-static.a(libcommon_session.cc.o):session.cc:(.text+0x7c70): first defined here
+323.9 collect2: error: ld returned 1 exit status
+323.9 make[2]: *** [CMakeFiles/Bejeweled_Server.dir/build.make:316: Bejeweled_Server] Error 1
+323.9 make[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/Bejeweled_Server.dir/all] Error 2
+323.9 make: *** [Makefile:91: all] Error 2
+------
+Dockerfile:46
+--------------------
+  45 |     # Build the project
+  46 | >>> RUN mkdir -p build && cd build && \
+  47 | >>>     cmake .. \
+  48 | >>>     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} \
+  49 | >>>     -DCMAKE_BUILD_TYPE=Release \
+  50 | >>>     -DVCPKG_TARGET_TRIPLET=x64-linux \
+  51 | >>>     && \
+  52 | >>>     make -j$(nproc)
+  53 |
+--------------------
+ERROR: failed to solve: process "/bin/sh -c mkdir -p build && cd build &&     cmake ..     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}     -DCMAKE_BUILD_TYPE=Release     -DVCPKG_TARGET_TRIPLET=x64-linux     &&     make -j$(nproc)" did not complete successfully: exit code: 2
+azureuser@ForNaph:~/Bejeweled_Server$
+azureuser@ForNaph:~/Bejeweled_Server$
+azureuser@ForNaph:~/Bejeweled_Server$

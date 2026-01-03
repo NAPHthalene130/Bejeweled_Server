@@ -2,7 +2,10 @@
   "name": "bejeweled-server",
   "version-string": "1.0.0",
   "dependencies": [
-    "boost",
+    "boost-asio",
+    "boost-system",
+    "boost-bind",
+    "boost-date-time",
     {
       "name": "mysql-connector-cpp",
       "features": [

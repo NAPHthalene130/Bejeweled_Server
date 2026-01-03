@@ -25,7 +25,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find Packages via vcpkg
 # On Ubuntu, ensure you have vcpkg installed and pass -DCMAKE_TOOLCHAIN_FILE=...
-find_package(Boost CONFIG REQUIRED)
+find_package(boost_asio CONFIG REQUIRED)
+find_package(boost_bind CONFIG REQUIRED)
+find_package(boost_date_time CONFIG REQUIRED)
+find_package(boost_system CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(unofficial-mysql-connector-cpp CONFIG REQUIRED)

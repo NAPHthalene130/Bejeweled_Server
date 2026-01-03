@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Trae" etag="Trae" version="21.0.0" type="device">
+  <diagram name="GameNetData" id="GameNetData-1">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="GameNetData" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="80" width="450" height="750" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="- type: int&#xa;- ID: string&#xa;- data: string&#xa;- IdToNum: map&lt;string, int&gt;&#xa;- NumToId: map&lt;int, string&gt;&#xa;- myBoard: vector&lt;vector&lt;int&gt;&gt;&#xa;- player1Score: int&#xa;- player2Score: int&#xa;- player3Score: int&#xa;- player4Score: int&#xa;- myScore: int&#xa;- seconds: int&#xa;- coordinates: vector&lt;pair&lt;int, int&gt;&gt;&#xa;- gameStarted: bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="2">
+          <mxGeometry y="26" width="450" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="2">
+          <mxGeometry y="396" width="450" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="+ GameNetData()&#xa;+ ~GameNetData()&#xa;+ getType(): int&#xa;+ setType(type: int): void&#xa;+ getID(): string&#xa;+ setID(ID: string): void&#xa;+ getData(): string&#xa;+ setData(data: string): void&#xa;+ getIdToNum(): map&lt;string, int&gt;&#xa;+ setIdToNum(IdToNum: map&lt;string, int&gt;): void&#xa;+ getNumToId(): map&lt;int, string&gt;&#xa;+ setNumToId(NumToId: map&lt;int, string&gt;): void&#xa;+ getMyBoard(): vector&lt;vector&lt;int&gt;&gt;&#xa;+ setMyBoard(myBoard: vector&lt;vector&lt;int&gt;&gt;): void&#xa;+ getPlayer1Score(): int&#xa;+ setPlayer1Score(player1Score: int): void&#xa;+ getPlayer2Score(): int&#xa;+ setPlayer2Score(player2Score: int): void&#xa;+ getPlayer3Score(): int&#xa;+ setPlayer3Score(player3Score: int): void&#xa;+ getPlayer4Score(): int&#xa;+ setPlayer4Score(player4Score: int): void&#xa;+ getMyScore(): int&#xa;+ setMyScore(myScore: int): void&#xa;+ getSeconds(): int&#xa;+ setSeconds(seconds: int): void&#xa;+ getCoordinates(): vector&lt;pair&lt;int, int&gt;&gt;&#xa;+ setCoordinates(coordinates: vector&lt;pair&lt;int, int&gt;&gt;): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="2">
+          <mxGeometry y="404" width="450" height="346" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

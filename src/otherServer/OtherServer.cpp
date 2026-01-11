@@ -282,7 +282,7 @@ void OtherServer::sendData(std::shared_ptr<tcp::socket> socket, OtherNetData dat
     // Convert data to json string
     json j = data;
     std::string response = j.dump();
-
+    std::cout << "[OtherServer][Info]: Sending data: " << response << std::endl;
     boost::asio::async_write(*socket,
                              boost::asio::buffer(response),
                              [socket](const boost::system::error_code& writeError,

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="Electron" modified="2024-01-09T12:00:00.000Z" agent="Trae" etag="game_flow" version="21.0.6" type="device">
+  <diagram id="game_diagram" name="Page-1">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="游戏服务流程图" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="启动服务" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="重置游戏状态 (Reset)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="170" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="监听端口" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="260" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="接受连接 (Accept)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="接收数据 (Receive Buffer)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="440" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="解析 JSON" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="530" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="请求类型 (Type)" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="620" width="80" height="80" as="geometry" />
+        </mxCell>
+        <!-- Type 0: Room Logic -->
+        <mxCell id="10" value="Type 0: 房间/连接" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="740" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="游戏已开始?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="830" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="发送 GAME_STARTED" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="940" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="处理进入/退出" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="940" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="广播房间人数 (Type 11)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1030" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="满3人?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1120" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="开始游戏/倒计时" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1230" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Type 2/4: Score -->
+        <mxCell id="17" value="Type 2/4: 分数/状态" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="740" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="更新分数" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="840" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="广播数据" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="940" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Timer Logic -->
+        <mxCell id="20" value="定时器 (Timer 90s)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="时间到 (Time Up)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1200" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="保存分数 (DB)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="广播结束/重置" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1380" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Loop -->
+        <mxCell id="24" value="继续接收 (Loop)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="1380" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" edge="1" parent="1" source="3" target="4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="4" target="5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="5" target="6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="6" target="7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="7" target="8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="8" target="9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <!-- Type 0 -->
+        <mxCell id="e7" edge="1" parent="1" source="9" target="10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="10" target="11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="11" target="12"><mxGeometry relative="1" as="geometry"><mxPoint x="110" y="870" as="sourcePoint"/><mxPoint x="60" y="940" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="11" target="13"><mxGeometry relative="1" as="geometry"><mxPoint x="170" y="870" as="sourcePoint"/><mxPoint x="240" y="940" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="13" target="14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="14" target="15"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="15" target="16"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="16" target="20"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="1320"/><mxPoint x="580" y="1320"/><mxPoint x="580" y="1130"/></Array></mxGeometry></mxCell>
+        <!-- Type 2/4 -->
+        <mxCell id="e15" edge="1" parent="1" source="9" target="17"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="17" target="18"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="18" target="19"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="19" target="24"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="460" y="1020"/><mxPoint x="400" y="1380"/></Array></mxGeometry></mxCell>
+        <!-- Timer -->
+        <mxCell id="e19" edge="1" parent="1" source="20" target="21"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="21" target="22"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="22" target="23"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="23" target="4"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="1410"/><mxPoint x="750" y="200"/></Array></mxGeometry></mxCell>
+        <!-- Loop -->
+        <mxCell id="e23" edge="1" parent="1" source="12" target="24"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="15" target="24"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="24" target="7"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="50" y="1410"/><mxPoint x="50" y="470"/></Array></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
